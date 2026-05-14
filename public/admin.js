@@ -90,20 +90,28 @@ async function suggest(item){
     alert('Prevajanje trenutno ni nastavljeno.');
     return;
   }
+  const slName=item.name?.sl||'';
+  const slDescription=item.description?.sl||'';
+  const hasNameSource=hasText(slName);
+  const hasDescriptionSource=hasText(slDescription);
+  const overwriteNeeded=['en','it','de'].some((lang)=>(hasNameSource&&hasText(item.name?.[lang]))||(hasDescriptionSource&&hasText(item.description?.[lang])));
+  let shouldOverwrite=true;
+  if(overwriteNeeded){
+    shouldOverwrite=confirm('Nekateri prevodi že obstajajo. Želite prepisati obstoječe prevode?');
+  }
+
   const errors=[];
   for(const lang of ['en','it','de']){
     const langLabel=lang.toUpperCase();
-    const slName=item.name?.sl||'';
-    const slDescription=item.description?.sl||'';
-    if(hasText(slName)){
+    if(hasNameSource){
       const hasExistingName=hasText(item.name?.[lang]);
-      if(!hasExistingName||confirm(`Polje imena za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
+      if(!hasExistingName||shouldOverwrite){
         try{item.name[lang]=await tr(slName,lang);}catch(e){errors.push(`${langLabel} ime: ${e.message}`);}
       }
     }
-    if(hasText(slDescription)){
+    if(hasDescriptionSource){
       const hasExistingDescription=hasText(item.description?.[lang]);
-      if(!hasExistingDescription||confirm(`Polje opisa za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
+      if(!hasExistingDescription||shouldOverwrite){
         try{item.description[lang]=await tr(slDescription,lang);}catch(e){errors.push(`${langLabel} opis: ${e.message}`);}
       }
     }
