@@ -17,18 +17,18 @@ function formatUpdatedAt(iso){
 function settingsSection(){
   const s=state.data.settings||{};
   const rows=[];
-  if(s.phone)rows.push(`<a class='info-row' href='tel:${s.phone.replace(/\s+/g,'')}'><span class='icon'>📞</span><span class='label'>${ui('phone_label')||'Phone'}</span><span class='value'>${s.phone}</span></a>`);
+  if(s.phone)rows.push(`<a class='info-row' href='tel:${s.phone.replace(/\s+/g,'')}'><span class='icon'>📞</span><span class='label'>${ui('phone_label')}</span><span class='value'>${s.phone}</span></a>`);
 
   if(s.address){
     const addressLink=s.googleMapsUrl||'';
     const addressValue=addressLink?`<a href='${addressLink}' target='_blank' rel='noopener noreferrer'>${s.address}</a>`:s.address;
-    rows.push(`<div class='info-row'><span class='icon'>📍</span><span class='label'>${ui('address_label')||'Address'}</span><span class='value'>${addressValue}</span></div>`);
+    rows.push(`<div class='info-row'><span class='icon'>📍</span><span class='label'>${ui('address_label')}</span><span class='value'>${addressValue}</span></div>`);
   }
 
   const opening=t(s.openingHours||{});
-  if(opening)rows.push(`<div class='info-row'><span class='icon'>🕒</span><span class='label'>${ui('opening_hours_label')||'Opening hours'}</span><span class='value'>${opening}</span></div>`);
+  if(opening)rows.push(`<div class='info-row'><span class='icon'>🕒</span><span class='label'>${ui('opening_hours_label')}</span><span class='value'>${opening}</span></div>`);
 
-  if(s.instagramUrl)rows.push(`<a class='info-row' href='${s.instagramUrl}' target='_blank' rel='noopener noreferrer'><span class='icon'>📷</span><span class='label'>${ui('instagram_label')||'Instagram'}</span><span class='value'>@casaderin</span></a>`);
+  if(s.instagramUrl)rows.push(`<a class='info-row' href='${s.instagramUrl}' target='_blank' rel='noopener noreferrer'><span class='icon'>📷</span><span class='label'>${ui('instagram_label')}</span><span class='value'>@casaderin</span></a>`);
 
   if(s.googleMapsUrl)rows.push(`<a class='maps-btn' href='${s.googleMapsUrl}' target='_blank' rel='noopener noreferrer'>🗺️ ${ui('open_google_maps')}</a>`);
 
