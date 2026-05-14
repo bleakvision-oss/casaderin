@@ -47,9 +47,19 @@ function introSection(){
   return `<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
 }
 
+
+function ensureLangFlags(){
+  const flags={sl:'🇸🇮',it:'🇮🇹',en:'🇬🇧',de:'🇩🇪'};
+  document.querySelectorAll('[data-lang]').forEach((btn)=>{
+    const flagEl=btn.querySelector('.flag');
+    if(flagEl&&flags[btn.dataset.lang])flagEl.textContent=flags[btn.dataset.lang];
+  });
+}
+
 function drinksSection(){const categories=state.data.drinkCategories||[];if(!categories.length)return card(ui('beverage'),(state.data.sections.drinks||[]).map(item).join(''));return card(ui('beverage'),categories.map((cat)=>{const items=(cat.items||[]).map(item).join('');if(!items)return'';return `<div class='drink-group'><h4>${t(cat.title)}</h4>${items}</div>`;}).join(''));}
 function render(){const d=state.data,s=d.sections;document.getElementById('content').innerHTML=[introSection(),card(ui('section_daily'),s.daily.map(item).join('')),card(ui('lunch'),s.lunch.map(item).join('')),card(ui('section_weekly'),s.weekly.map(item).join('')),card(ui('dessert'),s.desserts.map(item).join('')),drinksSection()].join('');}
 async function load(){state.data=await fetch('/api/menu').then(r=>r.json());render();}
 document.getElementById('today').textContent=new Date().toLocaleDateString('sl-SI',{dateStyle:'full'});
+ensureLangFlags();
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-lang]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.lang=b.dataset.lang;render();});
 load();
