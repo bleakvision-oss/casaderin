@@ -3,7 +3,8 @@ const fallbackUi={
   phone_label:{sl:'Telefon',en:'Phone',it:'Telefono',de:'Telefon'},
   address_label:{sl:'Naslov',en:'Address',it:'Indirizzo',de:'Adresse'},
   opening_hours_label:{sl:'Odpiralni čas',en:'Opening hours',it:'Orari di apertura',de:'Öffnungszeiten'},
-  instagram_label:{sl:'Instagram',en:'Instagram',it:'Instagram',de:'Instagram'}
+  instagram_label:{sl:'Instagram',en:'Instagram',it:'Instagram',de:'Instagram'},
+  open_google_maps:{sl:'Odpri v Google Maps',en:'Open in Google Maps',it:'Apri in Google Maps',de:'In Google Maps öffnen'}
 };
 const t=(obj)=>obj?.[state.lang]||obj?.sl||'';
 const ui=(k)=>t(state.data.translations?.[k]||fallbackUi[k]||{});
@@ -36,7 +37,7 @@ function settingsSection(){
 
   if(s.instagramUrl)rows.push(`<a class='info-row' href='${s.instagramUrl}' target='_blank' rel='noopener noreferrer'><span class='icon'>📷</span><span class='label'>${ui('instagram_label')}</span><span class='value'>@casaderin</span></a>`);
 
-  if(s.googleMapsUrl)rows.push(`<a class='maps-btn' href='${s.googleMapsUrl}' target='_blank' rel='noopener noreferrer'>🗺️ ${ui('open_google_maps')}</a>`);
+  if(s.googleMapsUrl)rows.push(`<a class='maps-btn' href='${s.googleMapsUrl}' target='_blank' rel='noopener noreferrer'><span class='icon' aria-hidden='true'>🗺️</span><span class='maps-label'>${ui('open_google_maps')}</span></a>`);
 
   if(!rows.length)return '';
   return `<aside class='visitor-card'><h3>${s.restaurantName||'Casa de Rin'}</h3><div class='visitor-grid'>${rows.join('')}</div></aside>`;

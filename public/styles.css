@@ -19,7 +19,7 @@ details>summary{cursor:pointer;list-style:none}details>summary h3{display:inline
 .info-row{display:grid;grid-template-columns:22px auto 1fr;gap:8px;align-items:start;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.65);text-decoration:none;color:inherit}
 .info-row .label{font-weight:700;color:#6e4d41}
 .info-row .value a{color:inherit}
-.maps-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;padding:10px 12px;border-radius:10px;background:var(--terra);color:#fff;text-decoration:none;font-weight:700}
+.maps-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:6px;padding:12px 14px;border-radius:12px;background:var(--terra);color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;box-shadow:0 6px 14px rgba(126,88,67,.24);border:1px solid rgba(255,255,255,.2);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}.maps-btn:hover{filter:brightness(1.04);box-shadow:0 8px 16px rgba(126,88,67,.28);transform:translateY(-1px)}.maps-btn:active{transform:translateY(0)}.maps-btn .icon{font-size:20px;line-height:1}.maps-btn .maps-label{font-size:15px;line-height:1.2}
 
 @media(min-width:920px){
   .intro-block{grid-template-columns:1fr 340px;align-items:start}
