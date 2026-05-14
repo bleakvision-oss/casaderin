@@ -1,6 +1,12 @@
 const state={lang:'sl',data:null};
+const fallbackUi={
+  phone_label:{sl:'Telefon',en:'Phone',it:'Telefono',de:'Telefon'},
+  address_label:{sl:'Naslov',en:'Address',it:'Indirizzo',de:'Adresse'},
+  opening_hours_label:{sl:'Odpiralni čas',en:'Opening hours',it:'Orari di apertura',de:'Öffnungszeiten'},
+  instagram_label:{sl:'Instagram',en:'Instagram',it:'Instagram',de:'Instagram'}
+};
 const t=(obj)=>obj?.[state.lang]||obj?.sl||'';
-const ui=(k)=>t(state.data.translations?.[k]||{});
+const ui=(k)=>t(state.data.translations?.[k]||fallbackUi[k]||{});
 const allergenLabel=(id)=>t(state.data.allergens?.[id]||{sl:id});
 const statusBadge=(x)=>x.status==='low'?`<span class='badge low'>${ui('status_low')}</span>`:x.status==='sold_out'?`<span class='badge sold'>${ui('status_sold_out')}</span>`:'';
 const allergenPills=(x)=>x.allergens?.length?`<div class='allergens'>${x.allergens.map((a)=>`<span class='all-pill'>${allergenLabel(a)}</span>`).join('')}</div>`:'';
