@@ -48,7 +48,11 @@ export const UI = {
   allergens: { sl: 'Alergeni', en: 'Allergens', it: 'Allergeni', de: 'Allergene' },
   add: { sl: 'Dodaj', en: 'Add', it: 'Aggiungi', de: 'Hinzufügen' },
   suggest: { sl: 'Predlagaj prevode', en: 'Suggest translations', it: 'Suggerisci traduzioni', de: 'Übersetzungen vorschlagen' },
-  last_updated_at: { sl: 'Nazadnje posodobljeno ob', en: 'Last updated at', it: 'Ultimo aggiornamento alle', de: 'Zuletzt aktualisiert um' }
+  last_updated_at: { sl: 'Nazadnje posodobljeno ob', en: 'Last updated at', it: 'Ultimo aggiornamento alle', de: 'Zuletzt aktualisiert um' },
+  open_google_maps: { sl: 'Odpri v Google Maps', en: 'Open in Google Maps', it: 'Apri in Google Maps', de: 'In Google Maps öffnen' },
+  phone_label: { sl: 'Telefon', en: 'Phone', it: 'Telefono', de: 'Telefon' },
+  address_label: { sl: 'Naslov', en: 'Address', it: 'Indirizzo', de: 'Adresse' },
+  opening_hours_label: { sl: 'Delovni čas', en: 'Opening hours', it: 'Orari', de: 'Öffnungszeiten' }
 };
 
 const item = (id, nameKey, desc, price, allergens = []) => ({ id, type: nameKey, sortOrder: 0, name: { sl: UI[nameKey]?.sl || '', en: UI[nameKey]?.en || '', it: UI[nameKey]?.it || '', de: UI[nameKey]?.de || '' }, description: desc, price, status: 'available', allergens });
