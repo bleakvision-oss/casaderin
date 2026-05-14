@@ -42,17 +42,57 @@ export const UI = {
   hide: { sl: 'Skrij', en: 'Hide', it: 'Nascondi', de: 'Ausblenden' },
   allergens: { sl: 'Alergeni', en: 'Allergens', it: 'Allergeni', de: 'Allergene' },
   add: { sl: 'Dodaj', en: 'Add', it: 'Aggiungi', de: 'Hinzufügen' },
-  suggest: { sl: 'Predlagaj prevode', en: 'Suggest translations', it: 'Suggerisci traduzioni', de: 'Übersetzungen vorschlagen' }
+  suggest: { sl: 'Predlagaj prevode', en: 'Suggest translations', it: 'Suggerisci traduzioni', de: 'Übersetzungen vorschlagen' },
+  last_updated_at: { sl: 'Nazadnje posodobljeno ob', en: 'Last updated at', it: 'Ultimo aggiornamento alle', de: 'Zuletzt aktualisiert um' }
 };
 
 const item = (id, nameKey, desc, price, allergens=[]) => ({ id, type: nameKey, sortOrder: 0, name: { sl: UI[nameKey]?.sl || '', en: UI[nameKey]?.en || '', it: UI[nameKey]?.it || '', de: UI[nameKey]?.de || '' }, description: desc, price, status: 'available', allergens });
 
 function normalizeMenuData(raw){const base=raw||{};const contact=base.contact||{};return {...base,settings:{restaurantName:base.settings?.restaurantName||'Casa de Rin',phone:base.settings?.phone||contact.phone||'',address:base.settings?.address||contact.location||'',googleMapsUrl:base.settings?.googleMapsUrl||'',instagramUrl:base.settings?.instagramUrl||contact.instagram||'',openingHours:{sl:base.settings?.openingHours?.sl||'',en:base.settings?.openingHours?.en||'',it:base.settings?.openingHours?.it||'',de:base.settings?.openingHours?.de||''},footerText:{sl:base.settings?.footerText?.sl||'',en:base.settings?.footerText?.en||'',it:base.settings?.footerText?.it||'',de:base.settings?.footerText?.de||''},heroImageUrl:base.settings?.heroImageUrl||''}};}
 
-const normalizeItem=(x)=>({ ...x, status: x.status || (x.hidden ? 'hidden' : x.soldOut ? 'sold_out' : 'available') });
-const normalizeData=(d)=>({ ...d, sections: Object.fromEntries(Object.entries(d.sections||{}).map(([k,v])=>[k,(v||[]).map(normalizeItem)])) });
-export async function loadMenu(){const s=getStore('menu');const d=await s.get(MENU_KEY,{type:'json'});if(!d){await s.setJSON(MENU_KEY,defaultData);return defaultData;}return normalizeData(d);}
-export async function saveMenu(data){const s=getStore('menu');const payload={...data,updatedAt:new Date().toISOString()};await s.setJSON(MENU_KEY,payload);return payload;}
+
+function upsertDishLibrary(payload){
+  const entries = [];
+  const sections = payload.sections || {};
+  Object.values(sections).forEach((arr)=> (arr||[]).forEach((it)=>{
+    entries.push({
+      name: it.name || {},
+      description: it.description || {},
+      price: it.price || '',
+      allergens: Array.isArray(it.allergens) ? [...it.allergens] : [],
+      soldOut: !!it.soldOut,
+      hidden: !!it.hidden,
+      lowStock: !!it.lowStock,
+      type: it.type || ''
+    });
+  }));
+  const existing = Array.isArray(payload.dishLibrary) ? payload.dishLibrary : [];
+  const now = new Date().toISOString();
+  const keyOf = (d) => [d.type, d.name?.sl, d.name?.en, d.name?.it, d.name?.de, d.description?.sl, d.description?.en, d.description?.it, d.description?.de].map((x)=>(x||'').trim().toLowerCase()).join('|');
+  const map = new Map(existing.map((d)=>[keyOf(d), d]));
+  entries.forEach((e)=>{
+    const k = keyOf(e);
+    if(!k.replace(/\|/g,'')) return;
+    const found = map.get(k);
+    if(found){
+      found.lastUsed = now;
+      found.price = e.price;
+      found.allergens = e.allergens;
+      found.soldOut = e.soldOut;
+      found.hidden = e.hidden;
+      found.lowStock = e.lowStock;
+      found.type = e.type;
+    } else {
+      map.set(k, {...e, lastUsed: now});
+    }
+  });
+  payload.dishLibrary = Array.from(map.values());
+  return payload;
+}
+const defaultData = { updatedAt: new Date().toISOString(), dishLibrary: [], translations: UI, allergens: ALLERGENS, settings:{ restaurantName:'Casa de Rin', phone:'+386 40 000 000', address:'Casa de Rin, Ljubljana', googleMapsUrl:'', instagramUrl:'https://instagram.com/casaderin', openingHours:{ sl:'', en:'', it:'', de:'' }, footerText:{ sl:'', en:'', it:'', de:'' }, heroImageUrl:'' }, sections:{ daily:[item('stew','stew',{sl:'Zelenjavna enolončnica dneva.',en:'Vegetable stew of the day.',it:'Zuppa vegetale del giorno.',de:'Gemüse-Eintopf des Tages.'},'7.50',['zelena']), item('snack','snack',{sl:'Čičerikina solata, veganski namaz in kruh.',en:'Chickpea salad, vegan spread and bread.',it:'Insalata di ceci, crema vegana e pane.',de:'Kichererbsensalat, veganer Aufstrich und Brot.'},'8.90',['gluten','soja'])], lunch:[item('lunch','lunch',{sl:'Mala enolončnica + malica + solata + sladica.',en:'Small stew + lunch + salad + dessert.',it:'Zuppa piccola + pranzo + insalata + dolce.',de:'Kleiner Eintopf + Tagesgericht + Salat + Dessert.'},'12.90',['gluten','soja'])], weekly:[item('w1','salad_bowl',{sl:'Sezonska zelenjava, humus in semena.',en:'Seasonal greens, hummus and seeds.',it:'Verdure stagionali, hummus e semi.',de:'Saisonales Gemüse, Hummus und Samen.'},'9.80',['sezam']), item('w2','vegan_sandwich',{sl:'Izbira: kruh ali tortilja.',en:'Choice: bread or tortilla.',it:'Scelta: pane o tortilla.',de:'Wahl: Brot oder Tortilla.'},'7.20',['gluten'])], desserts:[item('d1','dessert',{sl:'Dnevna sladica.',en:'Dessert of the day.',it:'Dolce del giorno.',de:'Dessert des Tages.'},'4.80')], drinks:[item('p1','beverage',{sl:'Domača pijača.',en:'Homemade beverage.',it:'Bevanda fatta in casa.',de:'Hausgemachtes Getränk.'},'2.00')] } };
+
+export async function loadMenu(){const s=getStore('menu');const d=await s.get(MENU_KEY,{type:'json'});if(!d){await s.setJSON(MENU_KEY,defaultData);return defaultData;}const normalized=normalizeMenuData(d);if(JSON.stringify(normalized)!==JSON.stringify(d))await s.setJSON(MENU_KEY,normalized);return normalized;}
+export async function saveMenu(data){const s=getStore('menu');const payload=upsertDishLibrary({...normalizeMenuData(data),updatedAt:new Date().toISOString()});await s.setJSON(MENU_KEY,payload);return payload;}
 export function makeToken(){const secret=process.env.SESSION_SECRET;const payload=`${Date.now()+TOKEN_TTL_MS}`;const sig=crypto.createHmac('sha256',secret).update(payload).digest('hex');return `${payload}.${sig}`;}
 export function verifyToken(token){const secret=process.env.SESSION_SECRET;if(!token||!secret)return false;const [exp,sig]=token.split('.');if(!exp||!sig||Date.now()>Number(exp))return false;const expected=crypto.createHmac('sha256',secret).update(exp).digest('hex');return crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(expected));}
 export const json=(status,body)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});

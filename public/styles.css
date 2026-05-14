@@ -1,9 +1,11 @@
 :root{--terra:#b96854;--cream:#fff9f1;--mint:#e8f3e8;--text:#2f2a27}*{box-sizing:border-box}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--cream);color:var(--text);margin:0}header{background:#fff;padding:16px;position:sticky;top:0;border-bottom:1px solid #eadfd2}.wrap{max-width:920px;margin:0 auto;padding:16px}.brand{font-size:28px;color:var(--terra);font-weight:700}.lang button,.btn{border:0;border-radius:10px;padding:8px 12px;background:#f2e7db;cursor:pointer}.lang .active{background:var(--terra);color:#fff}.grid{display:grid;gap:12px}.card{background:#fff;border:1px solid #eadfd2;border-radius:14px;padding:14px}.item h4{margin:.1rem 0}.price{font-weight:700;color:var(--terra)}.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#ffe5cc;font-size:12px}.sold{background:#ffd2d2}.allergens{font-size:12px;color:#6c635d;margin-top:6px}.muted{color:#6c635d}.hidden{display:none}input,textarea,select{width:100%;padding:8px;border:1px solid #d7ccc0;border-radius:8px}label{font-size:13px;font-weight:600}fieldset{border:1px solid #e7ddd2;border-radius:10px;padding:10px;margin:8px 0}.row{display:grid;grid-template-columns:1fr 1fr 120px;gap:8px}.admin-item{border:1px solid #ecdcca;border-radius:12px;padding:10px;margin-bottom:10px;background:#fff}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.success{color:#1b7d3f;font-weight:700}
 @media(max-width:700px){.row{grid-template-columns:1fr}}
-.item-sold{opacity:.6}
-.badge.low{background:#fff1bf}
-.allergen-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.allergen-pill{border:1px solid #d7ccc0;background:#f5f1ec;color:#3b342f;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer}
-.allergen-pill.selected{background:#dff1df;border-color:#8eb58e}
-.story-box{border:1px dashed #e0d4c7;border-radius:10px;padding:8px;margin:8px 0}
-.story-output{margin-top:8px}
+.savebar{position:sticky;bottom:0;background:#fff;padding:10px;border-top:1px solid #eadfd2;display:flex;gap:10px;align-items:center;z-index:4}
+.savebar .btn{padding:14px 18px;font-size:16px}
+.quick-status .btn{padding:10px 12px;min-height:40px}
+.status.active{background:var(--terra);color:#fff}
+details>summary{cursor:pointer;list-style:none}details>summary h3{display:inline}
+.suggestions{display:grid;gap:6px;margin:6px 0 10px}
+.suggestion{border:1px solid #e7ddd2;background:#fff;border-radius:10px;padding:8px;text-align:left}
+.updated{margin-bottom:10px}
+@media(max-width:700px){.btn{padding:12px 14px;font-size:15px}.admin-item{padding:12px}}
