@@ -42,9 +42,16 @@ function settingsSection(){
   return `<aside class='visitor-card'><h3>${s.restaurantName||'Casa de Rin'}</h3><div class='visitor-grid'>${rows.join('')}</div></aside>`;
 }
 
+
+function heroSection(){
+  const heroUrl=(state.data.settings?.heroImageUrl||'').trim();
+  if(!heroUrl)return '';
+  return `<section class='hero-media'><img src='${heroUrl}' alt='Casa de Rin' loading='lazy' decoding='async' referrerpolicy='no-referrer' onerror="this.closest('section.hero-media')?.remove();"></section>`;
+}
+
 function introSection(){
   const updated=formatUpdatedAt(state.data.updatedAt);
-  return `<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
+  return `${heroSection()}<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
 }
 
 function drinksSection(){const categories=state.data.drinkCategories||[];if(!categories.length)return card(ui('beverage'),(state.data.sections.drinks||[]).map(item).join(''));return card(ui('beverage'),categories.map((cat)=>{const items=(cat.items||[]).map(item).join('');if(!items)return'';return `<div class='drink-group'><h4>${t(cat.title)}</h4>${items}</div>`;}).join(''));}
