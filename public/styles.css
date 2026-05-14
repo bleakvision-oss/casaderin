@@ -9,3 +9,5 @@ details>summary{cursor:pointer;list-style:none}details>summary h3{display:inline
 .suggestion{border:1px solid #e7ddd2;background:#fff;border-radius:10px;padding:8px;text-align:left}
 .updated{margin-bottom:10px}
 @media(max-width:700px){.btn{padding:12px 14px;font-size:15px}.admin-item{padding:12px}}
+
+.status.ok.active{background:#2e9b4d;color:#fff}.status.warn.active{background:#d9ad2b;color:#000}.status.bad.active{background:#c63d3d;color:#fff}.status.muted.active{background:#8a8a8a;color:#fff}.pill-wrap{display:flex;gap:6px;flex-wrap:wrap}.pill{border:1px solid #d7ccc0;border-radius:999px;padding:8px 10px;background:#fff}.pill.active{background:#e8f3e8;border-color:#2e9b4d}.all-pill{display:inline-block;background:#f3efe8;border-radius:999px;padding:2px 8px;margin-right:4px;font-size:12px}.badge.low{background:#ffe28a}.sold-dim{opacity:.6}.drink-group{margin-bottom:12px}.drink-group>h4{margin:.4rem 0}
