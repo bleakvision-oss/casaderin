@@ -1,120 +1,35 @@
 let token = localStorage.getItem('adminToken') || '';
-let data = null;
-let dirty = false;
+let data = null; let dirty = false;
 const langs = ['sl', 'en', 'it', 'de'];
-
-const t = (o, k) => o?.[k] || o?.sl || k;
+const t = (o, k = 'sl') => o?.[k] || o?.sl || '';
+const statusKeys = ['available', 'low', 'sold_out', 'hidden'];
+const statusClass = { available: 'ok', low: 'warn', sold_out: 'bad', hidden: 'muted' };
 const allergenIds = () => Object.keys(data.allergens || {});
-const norm = (v) => (v || '').trim().toLowerCase();
+const langFields = (obj, f) => langs.map((l) => `<label>${f} ${l.toUpperCase()}<input data-l='${l}' data-f='${f}' value="${(obj[f]?.[l] || '').replaceAll('"', '&quot;')}"></label>`).join('');
+const markDirty = () => dirty = true;
+const clearDirty = () => dirty = false;
+const emptyItem = (type='') => ({ id: crypto.randomUUID(), type, name: { sl: '', en: '', it: '', de: '' }, description: { sl: '', en: '', it: '', de: '' }, price: '0.00', allergens: [], status: 'available', hidden: false, soldOut: false, lowStock: false, sortOrder: 0 });
+const syncFlags = (x)=>{x.hidden=x.status==='hidden';x.soldOut=x.status==='sold_out';x.lowStock=x.status==='low';};
 
-const langFields = (obj, field) => langs.map((l) => `<label>${field} ${l.toUpperCase()}<input data-l='${l}' data-f='${field}' value="${(obj[field]?.[l] || '').replaceAll('"', '&quot;')}"></label>`).join('');
-
-function markDirty(){ dirty = true; }
-function clearDirty(){ dirty = false; }
-window.addEventListener('beforeunload', (e) => { if (!dirty) return; e.preventDefault(); e.returnValue = ''; });
-
-function formatLastUsed(iso) {
-  if (!iso) return '';
-  return new Date(iso).toLocaleDateString('sl-SI');
+function statusPills(x){return `<div class='inline quick-status'>${statusKeys.map((s)=>`<button class='btn status ${statusClass[s]} ${x.status===s?'active':''}' data-status='${s}'>${t(data.translations[`status_${s}`])}</button>`).join('')}</div>`;}
+function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
+function row(section, i, x, drinkCatIdx=null){
+  const path = drinkCatIdx===null ? `data.sections.${section}[${i}]` : `data.drinkCategories[${drinkCatIdx}].items[${i}]`;
+  return `<div class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}'><div class='inline'><small>${path}</small></div>${statusPills(x)}${langFields(x,'name')}${langFields(x,'description')}<div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Cena<input data-f='price' value='${x.price||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div><fieldset><legend>${t(data.translations.allergens)}</legend>${allergenPills(x)}</fieldset><div class='inline'><button class='btn up'>↑</button><button class='btn down'>↓</button><button class='btn del'>Izbriši</button></div></div>`;
 }
-
-function getSuggestions(query, currentType) {
-  const q = norm(query);
-  if (!q || q.length < 2) return [];
-  return (data.dishLibrary || []).filter((d) => {
-    const hay = [d.name?.sl, d.name?.en, d.name?.it, d.name?.de, d.description?.sl, d.description?.en, d.description?.it, d.description?.de, d.type].map(norm).join(' ');
-    return hay.includes(q);
-  }).sort((a, b) => new Date(b.lastUsed || 0) - new Date(a.lastUsed || 0)).slice(0, 6).map((x) => ({...x, relevantType: x.type === currentType}));
+function section(key,titleKey){const arr=data.sections[key]||[];return `<details class='card' open><summary><h3>${t(data.translations[titleKey])}</h3></summary>${arr.map((x,i)=>row(key,i,x)).join('')}<button class='btn add' data-add='${key}'>+ ${t(data.translations.add)}</button></details>`;}
+function drinksSection(){return `<details class='card' open><summary><h3>${t(data.translations.beverage)}</h3></summary>${(data.drinkCategories||[]).map((cat,ci)=>`<details class='card' open><summary><strong>${t(cat.title)}</strong></summary>${(cat.items||[]).map((x,i)=>row('drinks',i,x,ci)).join('')}<button class='btn add-drink' data-ci='${ci}'>+ ${t(data.translations.add)}</button></details>`).join('')}</details>`;}
+function settingsCard(){const s=data.settings;return `<details class='card' id='restaurant-settings' open><summary><h3>Restaurant settings</h3></summary><label>Restaurant name<input data-settings='restaurantName' value='${s.restaurantName||''}'></label><label>Phone number<input data-settings='phone' value='${s.phone||''}'></label><label>Address<input data-settings='address' value='${s.address||''}'></label><label>Google Maps URL<input data-settings='googleMapsUrl' value='${s.googleMapsUrl||''}'></label><label>Instagram URL<input data-settings='instagramUrl' value='${s.instagramUrl||''}'></label>${langFields(s,'openingHours')}${langFields(s,'footerText')}<label>Optional hero image URL<input data-settings='heroImageUrl' value='${s.heroImageUrl||''}'></label></details>`;}
+function resolveTarget(el){const s=el.dataset.s,i=+el.dataset.i,c=el.dataset.c;return c!==''?data.drinkCategories[+c].items[i]:data.sections[s][i];}
+function bind(){document.querySelectorAll('.admin-item').forEach((el)=>{const target=resolveTarget(el);el.querySelectorAll('input').forEach((inp)=>inp.addEventListener('input',()=>{markDirty();const {f,l}=inp.dataset;if(l){target[f]=target[f]||{};target[f][l]=inp.value;} else target[f]=f==='sortOrder'?Number(inp.value||0):inp.value;}));el.querySelectorAll('[data-status]').forEach((b)=>b.onclick=()=>{target.status=b.dataset.status;syncFlags(target);markDirty();render();});el.querySelectorAll('[data-a]').forEach((b)=>b.onclick=()=>{markDirty();target.allergens=target.allergens||[];const idx=target.allergens.indexOf(b.dataset.a);if(idx>=0)target.allergens.splice(idx,1);else target.allergens.push(b.dataset.a);render();});el.querySelector('.del').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;if(c!=='')data.drinkCategories[+c].items.splice(i,1);else data.sections[s].splice(i,1);render();};el.querySelector('.up').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];}render();};el.querySelector('.down').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];}render();};});
+  document.querySelectorAll('[data-add]').forEach((b)=>b.onclick=()=>{data.sections[b.dataset.add].push(emptyItem(b.dataset.add));markDirty();render();});
+  document.querySelectorAll('[data-ci]').forEach((b)=>b.onclick=()=>{data.drinkCategories[+b.dataset.ci].items.push(emptyItem('beverage'));markDirty();render();});
+  document.querySelectorAll('[data-settings]').forEach((i)=>i.addEventListener('input',()=>{data.settings[i.dataset.settings]=i.value;markDirty();}));
+  document.querySelectorAll('#restaurant-settings [data-f][data-l]').forEach((i)=>i.addEventListener('input',()=>{const {f,l}=i.dataset;data.settings[f]=data.settings[f]||{};data.settings[f][l]=i.value;markDirty();}));
+  document.getElementById('save').onclick=save;
 }
-
-function suggestionsHtml(section, index, q, type) {
-  const items = getSuggestions(q, type);
-  if (!items.length) return '';
-  return `<div class='suggestions'>${items.map((s, i) => `<button class='suggestion' type='button' data-use-suggestion='${section}:${index}:${i}'><strong>${s.name?.sl || s.name?.en || 'Jed'}</strong> <span class='muted'>${s.price || ''}€</span><div class='muted'>Nazadnje uporabljeno: ${formatLastUsed(s.lastUsed)}</div></button>`).join('')}</div>`;
-}
-
-function row(section, i, x) {
-  const activeText = x._suggestText || '';
-  return `<div class='admin-item' data-s='${section}' data-i='${i}'>
-  <div class='inline quick-status'>
-    <button class='btn status ${!x.hidden && !x.soldOut ? 'active' : ''}' data-status='available'>Na voljo</button>
-    <button class='btn status ${x.lowStock ? 'active' : ''}' data-status='low'>Kmalu zmanjka</button>
-    <button class='btn status ${x.soldOut ? 'active' : ''}' data-status='sold'>Razprodano</button>
-    <button class='btn status ${x.hidden ? 'active' : ''}' data-status='hidden'>Skrito</button>
-  </div>
-  <label>type<input data-f='type' value='${x.type || ''}'></label>
-  ${langFields(x, 'name')}
-  ${suggestionsHtml(section, i, activeText, x.type)}
-  ${langFields(x, 'description')}
-  <label>Cena<input data-f='price' value='${x.price || ''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder || 0}'></label>
-  <div class='inline'><label><input type='checkbox' data-f='soldOut' ${x.soldOut ? 'checked' : ''}> ${t(data.translations.sold_out, 'sl')}</label><label><input type='checkbox' data-f='hidden' ${x.hidden ? 'checked' : ''}> ${t(data.translations.hide, 'sl')}</label></div>
-  <fieldset><legend>${t(data.translations.allergens, 'sl')}</legend><div class='inline'>${allergenIds().map((a) => `<label><input type='checkbox' data-a='${a}' ${x.allergens?.includes(a) ? 'checked' : ''}> ${a}</label>`).join('')}</div></fieldset>
-  <div class='inline'><button class='btn suggest'>Predlagaj prevode</button><button class='btn duplicate'>Duplicate</button><button class='btn del'>Izbriši</button></div></div>`;
-}
-
-function section(key, titleKey) { const arr = data.sections[key]; return `<details class='card' open><summary><h3>${t(data.translations[titleKey], 'sl')}</h3></summary>${arr.map((x, i) => row(key, i, x)).join('')}<button class='btn add' data-add='${key}'>+ ${t(data.translations.add, 'sl')}</button></details>`; }
-function settingsCard() { const s = data.settings; return `<details class='card' id='restaurant-settings'><summary><h3>Nastavitve lokala</h3></summary><label>Restaurant name<input data-settings='restaurantName' value="${(s.restaurantName || '').replaceAll('"', '&quot;')}"></label><label>Phone number<input data-settings='phone' value="${(s.phone || '').replaceAll('"', '&quot;')}"></label><label>Address<input data-settings='address' value="${(s.address || '').replaceAll('"', '&quot;')}"></label><label>Google Maps link<input data-settings='googleMapsUrl' value="${(s.googleMapsUrl || '').replaceAll('"', '&quot;')}"></label><label>Instagram URL<input data-settings='instagramUrl' value="${(s.instagramUrl || '').replaceAll('"', '&quot;')}"></label><label>Optional hero image URL<input data-settings='heroImageUrl' value="${(s.heroImageUrl || '').replaceAll('"', '&quot;')}"></label>${langFields(s, 'openingHours')}${langFields(s, 'footerText')}</details>`; }
-function emptyItem(type) { return { id: crypto.randomUUID(), type, name: { sl: '', en: '', it: '', de: '' }, description: { sl: '', en: '', it: '', de: '' }, price: '0.00', allergens: [], soldOut: false, hidden: false, lowStock: false, sortOrder: 0 }; }
-
-function applySuggestion(target, suggestion) {
-  target.name = { ...target.name, ...suggestion.name };
-  target.description = { ...target.description, ...suggestion.description };
-  target.price = suggestion.price || target.price;
-  target.allergens = Array.isArray(suggestion.allergens) ? [...suggestion.allergens] : target.allergens;
-  if (suggestion.type) target.type = suggestion.type;
-  target.soldOut = !!suggestion.soldOut;
-  target.hidden = !!suggestion.hidden;
-  target.lowStock = !!suggestion.lowStock;
-}
-
-function bind() {
-  document.querySelectorAll('.admin-item').forEach((el) => {
-    const s = el.dataset.s, i = +el.dataset.i, target = data.sections[s][i];
-    el.querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => { markDirty(); const { f, l, a } = inp.dataset; if (a) { target.allergens = allergenIds().filter((x) => el.querySelector(`[data-a="${x}"]`)?.checked); return; } if (inp.type === 'checkbox') { target[f] = inp.checked; return; } if (l) { target[f] = target[f] || {}; target[f][l] = inp.value; if (f === 'name' && l === 'sl') target._suggestText = inp.value; if (f === 'description' && l === 'sl' && !target._suggestText) target._suggestText = inp.value; } else target[f] = f === 'sortOrder' ? Number(inp.value || 0) : inp.value; }));
-    el.querySelector('.del').onclick = () => { markDirty(); data.sections[s].splice(i, 1); render(); };
-    el.querySelector('.duplicate').onclick = () => { markDirty(); const cp = structuredClone(target); cp.id = crypto.randomUUID(); cp.name = { ...cp.name, sl: cp.name?.sl ? `${cp.name.sl} kopija` : 'kopija' }; data.sections[s].splice(i + 1, 0, cp); render(); };
-    el.querySelector('.suggest').onclick = () => suggest(target, el);
-    el.querySelectorAll('[data-status]').forEach((b) => b.onclick = () => { markDirty(); const st = b.dataset.status; target.hidden = st === 'hidden'; target.soldOut = st === 'sold'; target.lowStock = st === 'low'; if (st === 'available') { target.hidden = false; target.soldOut = false; target.lowStock = false; } render(); });
-  });
-  document.querySelectorAll('[data-use-suggestion]').forEach((b) => b.onclick = () => { const [s, i, idx] = b.dataset.useSuggestion.split(':'); const source = getSuggestions(data.sections[s][+i]._suggestText || '', data.sections[s][+i].type)[+idx]; if (source) { applySuggestion(data.sections[s][+i], source); markDirty(); render(); } });
-  document.querySelectorAll('[data-add]').forEach((b) => b.onclick = () => { markDirty(); data.sections[b.dataset.add].push(emptyItem(b.dataset.add)); render(); });
-  document.querySelectorAll('[data-settings]').forEach((inp) => inp.addEventListener('input', () => { markDirty(); data.settings[inp.dataset.settings] = inp.value; }));
-  document.querySelectorAll('#restaurant-settings [data-f][data-l]').forEach((inp) => inp.addEventListener('input', () => { markDirty(); const f = inp.dataset.f, l = inp.dataset.l; data.settings[f] = data.settings[f] || {}; data.settings[f][l] = inp.value; }));
-  document.getElementById('save').onclick = save;
-}
-function hasText(v){return !!(v||'').trim();}
-async function isTranslationConfigured(){try{const r=await fetch('/.netlify/functions/translate-suggest');const j=await r.json();return !!j.configured;}catch{return false;}}
-async function suggest(item){
-  const canTranslate=await isTranslationConfigured();
-  if(!canTranslate){
-    alert('Prevajanje trenutno ni nastavljeno.');
-    return;
-  }
-  const errors=[];
-  for(const lang of ['en','it','de']){
-    const langLabel=lang.toUpperCase();
-    const slName=item.name?.sl||'';
-    const slDescription=item.description?.sl||'';
-    if(hasText(slName)){
-      const hasExistingName=hasText(item.name?.[lang]);
-      if(!hasExistingName||confirm(`Polje imena za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
-        try{item.name[lang]=await tr(slName,lang);}catch(e){errors.push(`${langLabel} ime: ${e.message}`);}
-      }
-    }
-    if(hasText(slDescription)){
-      const hasExistingDescription=hasText(item.description?.[lang]);
-      if(!hasExistingDescription||confirm(`Polje opisa za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
-        try{item.description[lang]=await tr(slDescription,lang);}catch(e){errors.push(`${langLabel} opis: ${e.message}`);}
-      }
-    }
-  }
-  if(errors.length) alert(`Nekateri prevodi niso uspeli:\n- ${errors.join('\n- ')}`);
-  markDirty();
-  render();
-}
-async function tr(text,lang){const map={en:'EN',it:'IT',de:'DE'};const r=await fetch('/.netlify/functions/translate-suggest',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,targetLang:map[lang]})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Napaka prevoda');if(!j.text)throw new Error('Prevod ni bil vrnjen');return j.text;}
-function render(){const app=document.getElementById('app');app.innerHTML=[settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),section('drinks','beverage'),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button> <span id='msg'></span></div>"].join('');bind();}
-async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';if(r.ok) clearDirty();}
-async function load(){data=await fetch('/api/menu').then(r=>r.json());data.dishLibrary=data.dishLibrary||[];data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');clearDirty();render();}
-async function login(){const loginErr=document.getElementById('loginErr');loginErr.textContent='';const password=document.getElementById('pwd').value;try{const r=await fetch('/.netlify/functions/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});const j=await r.json().catch(()=>({}));if(!r.ok)return loginErr.textContent=j.error||'Napačno geslo';token=j.token;localStorage.setItem('adminToken',token);await load();}catch{loginErr.textContent='Napaka strežnika. Poskusite znova.';}}
+function render(){document.getElementById('app').innerHTML=[settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),drinksSection(),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button><span id='msg'></span></div>"].join('');bind();}
+async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';if(r.ok)clearDirty();}
+async function load(){data=await fetch('/api/menu').then(r=>r.json());data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};(Object.values(data.sections||{}).flat()).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);});(data.drinkCategories||[]).forEach((c)=>(c.items||[]).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);}));document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');clearDirty();render();}
+async function login(){const loginErr=document.getElementById('loginErr');loginErr.textContent='';const password=document.getElementById('pwd').value;const r=await fetch('/.netlify/functions/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});const j=await r.json().catch(()=>({}));if(!r.ok)return loginErr.textContent=j.error||'Napačno geslo';token=j.token;localStorage.setItem('adminToken',token);await load();}
 document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();await login();});if(token)load();
