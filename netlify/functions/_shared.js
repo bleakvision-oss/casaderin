@@ -23,6 +23,10 @@ export const ALLERGENS = {
 };
 
 export const UI = {
+  status_available: { sl: 'Na voljo', en: 'Available', it: 'Disponibile', de: 'Verfügbar' },
+  status_low: { sl: 'Kmalu zmanjka', en: 'Almost gone', it: 'Quasi esaurito', de: 'Fast ausverkauft' },
+  status_sold_out: { sl: 'Razprodano', en: 'Sold out', it: 'Esaurito', de: 'Ausverkauft' },
+  status_hidden: { sl: 'Skrito', en: 'Hidden', it: 'Nascosto', de: 'Ausgeblendet' },
   section_daily: { sl: 'Dnevna ponudba', en: 'Daily offer', it: 'Offerta del giorno', de: 'Tagesangebot' },
   section_weekly: { sl: 'Tedenska ponudba', en: 'Weekly offer', it: 'Offerta settimanale', de: 'Wochenangebot' },
   section_sweets_drinks: { sl: 'Sladice in pijača', en: 'Sweets and beverages', it: 'Dolci e bevande', de: 'Süßes und Getränke' },
@@ -42,7 +46,7 @@ export const UI = {
   last_updated_at: { sl: 'Nazadnje posodobljeno ob', en: 'Last updated at', it: 'Ultimo aggiornamento alle', de: 'Zuletzt aktualisiert um' }
 };
 
-const item = (id, nameKey, desc, price, allergens=[]) => ({ id, type: nameKey, sortOrder: 0, name: { sl: UI[nameKey]?.sl || '', en: UI[nameKey]?.en || '', it: UI[nameKey]?.it || '', de: UI[nameKey]?.de || '' }, description: desc, price, soldOut: false, hidden: false, allergens });
+const item = (id, nameKey, desc, price, allergens=[]) => ({ id, type: nameKey, sortOrder: 0, name: { sl: UI[nameKey]?.sl || '', en: UI[nameKey]?.en || '', it: UI[nameKey]?.it || '', de: UI[nameKey]?.de || '' }, description: desc, price, status: 'available', allergens });
 
 function normalizeMenuData(raw){const base=raw||{};const contact=base.contact||{};return {...base,settings:{restaurantName:base.settings?.restaurantName||'Casa de Rin',phone:base.settings?.phone||contact.phone||'',address:base.settings?.address||contact.location||'',googleMapsUrl:base.settings?.googleMapsUrl||'',instagramUrl:base.settings?.instagramUrl||contact.instagram||'',openingHours:{sl:base.settings?.openingHours?.sl||'',en:base.settings?.openingHours?.en||'',it:base.settings?.openingHours?.it||'',de:base.settings?.openingHours?.de||''},footerText:{sl:base.settings?.footerText?.sl||'',en:base.settings?.footerText?.en||'',it:base.settings?.footerText?.it||'',de:base.settings?.footerText?.de||''},heroImageUrl:base.settings?.heroImageUrl||''}};}
 
