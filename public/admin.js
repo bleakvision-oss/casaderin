@@ -82,7 +82,25 @@ function bind() {
   document.querySelectorAll('#restaurant-settings [data-f][data-l]').forEach((inp) => inp.addEventListener('input', () => { markDirty(); const f = inp.dataset.f, l = inp.dataset.l; data.settings[f] = data.settings[f] || {}; data.settings[f][l] = inp.value; }));
   document.getElementById('save').onclick = save;
 }
-async function suggest(item){for(const lang of ['en','it','de']){if(item.name?.[lang]||item.description?.[lang]){if(!confirm(`${lang.toUpperCase()} že obstaja. Prepišem?`))continue;}const [n,d]=await Promise.all([tr(item.name.sl,lang),tr(item.description.sl,lang)]);if(n) item.name[lang]=n;if(d) item.description[lang]=d;}markDirty();render();}
+function hasText(v){return !!(v||'').trim();}
+async function isTranslationConfigured(){try{const r=await fetch('/.netlify/functions/translate-suggest');const j=await r.json();return !!j.configured;}catch{return false;}}
+async function suggest(item){
+  const canTranslate=await isTranslationConfigured();
+  if(!canTranslate){
+    alert('Prevajanje trenutno ni nastavljeno. Dodaj DEEPL_API_KEY v Netlify environment variables.');
+    return;
+  }
+  for(const lang of ['en','it','de']){
+    const hasExistingName=hasText(item.name?.[lang]);
+    const hasExistingDescription=hasText(item.description?.[lang]);
+    if((hasExistingName||hasExistingDescription)&&!confirm(`${lang.toUpperCase()} prevod že obstaja. Želite zamenjati besedilo?`))continue;
+    const [n,d]=await Promise.all([tr(item.name.sl,lang),tr(item.description.sl,lang)]);
+    if(n) item.name[lang]=n;
+    if(d) item.description[lang]=d;
+  }
+  markDirty();
+  render();
+}
 async function tr(text,lang){const map={en:'EN',it:'IT',de:'DE'};const r=await fetch('/.netlify/functions/translate-suggest',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,targetLang:map[lang]})});const j=await r.json();if(!r.ok){alert(j.error||'Napaka prevoda');return '';}return j.text;}
 function render(){const app=document.getElementById('app');app.innerHTML=[settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),section('drinks','beverage'),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button> <span id='msg'></span></div>"].join('');bind();}
 async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';if(r.ok) clearDirty();}
