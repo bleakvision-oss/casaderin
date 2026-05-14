@@ -44,4 +44,8 @@ async function login(){
   }
 }
 
-document.getElementById('loginBtn').onclick=login;if(token)load();
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  await login();
+});
+if(token)load();
