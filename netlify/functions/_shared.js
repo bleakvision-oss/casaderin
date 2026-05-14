@@ -63,4 +63,9 @@ export function verifyToken(token) {
   return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
 }
 
-export const json = (statusCode, body) => ({ statusCode, headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+export const json = (status, body) => new Response(JSON.stringify(body), {
+  status,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
