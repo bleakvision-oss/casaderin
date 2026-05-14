@@ -10,18 +10,57 @@ const markDirty = () => dirty = true;
 const clearDirty = () => dirty = false;
 const emptyItem = (type='') => ({ id: crypto.randomUUID(), type, name: { sl: '', en: '', it: '', de: '' }, description: { sl: '', en: '', it: '', de: '' }, price: '0.00', allergens: [], status: 'available', hidden: false, soldOut: false, lowStock: false, sortOrder: 0 });
 const syncFlags = (x)=>{x.hidden=x.status==='hidden';x.soldOut=x.status==='sold_out';x.lowStock=x.status==='low';};
+const translationTargets = ['en', 'it', 'de'];
+const langToDeepL = { en: 'EN', it: 'IT', de: 'DE' };
 
 function statusPills(x){return `<div class='inline quick-status'>${statusKeys.map((s)=>`<button class='btn status ${statusClass[s]} ${x.status===s?'active':''}' data-status='${s}'>${t(data.translations[`status_${s}`])}</button>`).join('')}</div>`;}
 function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
 function row(section, i, x, drinkCatIdx=null){
   const path = drinkCatIdx===null ? `data.sections.${section}[${i}]` : `data.drinkCategories[${drinkCatIdx}].items[${i}]`;
-  return `<div class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}'><div class='inline'><small>${path}</small></div>${statusPills(x)}${langFields(x,'name')}${langFields(x,'description')}<div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Cena<input data-f='price' value='${x.price||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div><fieldset><legend>${t(data.translations.allergens)}</legend>${allergenPills(x)}</fieldset><div class='inline'><button class='btn up'>↑</button><button class='btn down'>↓</button><button class='btn del'>Izbriši</button></div></div>`;
+  return `<div class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}'><div class='inline'><small>${path}</small></div>${statusPills(x)}${langFields(x,'name')}${langFields(x,'description')}<div class='inline'><button class='btn suggest'>Predlagaj prevode</button></div><div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Cena<input data-f='price' value='${x.price||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div><fieldset><legend>${t(data.translations.allergens)}</legend>${allergenPills(x)}</fieldset><div class='inline'><button class='btn up'>↑</button><button class='btn down'>↓</button><button class='btn del'>Izbriši</button></div></div>`;
 }
 function section(key,titleKey){const arr=data.sections[key]||[];return `<details class='card' open><summary><h3>${t(data.translations[titleKey])}</h3></summary>${arr.map((x,i)=>row(key,i,x)).join('')}<button class='btn add' data-add='${key}'>+ ${t(data.translations.add)}</button></details>`;}
 function drinksSection(){return `<details class='card' open><summary><h3>${t(data.translations.beverage)}</h3></summary>${(data.drinkCategories||[]).map((cat,ci)=>`<details class='card' open><summary><strong>${t(cat.title)}</strong></summary>${(cat.items||[]).map((x,i)=>row('drinks',i,x,ci)).join('')}<button class='btn add-drink' data-ci='${ci}'>+ ${t(data.translations.add)}</button></details>`).join('')}</details>`;}
 function settingsCard(){const s=data.settings;return `<details class='card' id='restaurant-settings' open><summary><h3>Restaurant settings</h3></summary><label>Restaurant name<input data-settings='restaurantName' value='${s.restaurantName||''}'></label><label>Phone number<input data-settings='phone' value='${s.phone||''}'></label><label>Address<input data-settings='address' value='${s.address||''}'></label><label>Google Maps URL<input data-settings='googleMapsUrl' value='${s.googleMapsUrl||''}'></label><label>Instagram URL<input data-settings='instagramUrl' value='${s.instagramUrl||''}'></label>${langFields(s,'openingHours')}${langFields(s,'footerText')}<label>Optional hero image URL<input data-settings='heroImageUrl' value='${s.heroImageUrl||''}'></label></details>`;}
 function resolveTarget(el){const s=el.dataset.s,i=+el.dataset.i,c=el.dataset.c;return c!==''?data.drinkCategories[+c].items[i]:data.sections[s][i];}
-function bind(){document.querySelectorAll('.admin-item').forEach((el)=>{const target=resolveTarget(el);el.querySelectorAll('input').forEach((inp)=>inp.addEventListener('input',()=>{markDirty();const {f,l}=inp.dataset;if(l){target[f]=target[f]||{};target[f][l]=inp.value;} else target[f]=f==='sortOrder'?Number(inp.value||0):inp.value;}));el.querySelectorAll('[data-status]').forEach((b)=>b.onclick=()=>{target.status=b.dataset.status;syncFlags(target);markDirty();render();});el.querySelectorAll('[data-a]').forEach((b)=>b.onclick=()=>{markDirty();target.allergens=target.allergens||[];const idx=target.allergens.indexOf(b.dataset.a);if(idx>=0)target.allergens.splice(idx,1);else target.allergens.push(b.dataset.a);render();});el.querySelector('.del').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;if(c!=='')data.drinkCategories[+c].items.splice(i,1);else data.sections[s].splice(i,1);render();};el.querySelector('.up').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];}render();};el.querySelector('.down').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];}render();};});
+async function suggestTranslationsForItem(target){
+  const availability = await fetch('/.netlify/functions/translate-suggest').then((r)=>r.json().catch(()=>({})));
+  if (!availability.configured) {
+    alert('DEEPL_API_KEY manjka. Prevajanje trenutno ni nastavljeno.');
+    return;
+  }
+  const hasContent = translationTargets.some((lang)=>((target.name?.[lang] || '').trim() || (target.description?.[lang] || '').trim()));
+  if (hasContent && !window.confirm('Nekatera ciljna polja (EN/IT/DE) že vsebujejo besedilo. Ali jih želiš prepisati?')) return;
+  const slName = (target.name?.sl || '').trim();
+  const slDescription = (target.description?.sl || '').trim();
+  if (!slName && !slDescription) {
+    alert('Manjka slovensko besedilo za prevod.');
+    return;
+  }
+  const translate = async (text, targetLang) => {
+    const r = await fetch('/.netlify/functions/translate-suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, targetLang }) });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(j.error || 'Napaka pri prevajanju.');
+    return j.text;
+  };
+  try {
+    for (const lang of translationTargets) {
+      if (slName) {
+        target.name = target.name || {};
+        target.name[lang] = await translate(slName, langToDeepL[lang]);
+      }
+      if (slDescription) {
+        target.description = target.description || {};
+        target.description[lang] = await translate(slDescription, langToDeepL[lang]);
+      }
+    }
+    markDirty();
+    render();
+  } catch (e) {
+    alert(e.message || 'Napaka pri prevajanju.');
+  }
+}
+function bind(){document.querySelectorAll('.admin-item').forEach((el)=>{const target=resolveTarget(el);el.querySelectorAll('input').forEach((inp)=>inp.addEventListener('input',()=>{markDirty();const {f,l}=inp.dataset;if(l){target[f]=target[f]||{};target[f][l]=inp.value;} else target[f]=f==='sortOrder'?Number(inp.value||0):inp.value;}));el.querySelectorAll('[data-status]').forEach((b)=>b.onclick=()=>{target.status=b.dataset.status;syncFlags(target);markDirty();render();});el.querySelectorAll('[data-a]').forEach((b)=>b.onclick=()=>{markDirty();target.allergens=target.allergens||[];const idx=target.allergens.indexOf(b.dataset.a);if(idx>=0)target.allergens.splice(idx,1);else target.allergens.push(b.dataset.a);render();});el.querySelector('.suggest').onclick=()=>suggestTranslationsForItem(target);el.querySelector('.del').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;if(c!=='')data.drinkCategories[+c].items.splice(i,1);else data.sections[s].splice(i,1);render();};el.querySelector('.up').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];}render();};el.querySelector('.down').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];}render();};});
   document.querySelectorAll('[data-add]').forEach((b)=>b.onclick=()=>{data.sections[b.dataset.add].push(emptyItem(b.dataset.add));markDirty();render();});
   document.querySelectorAll('[data-ci]').forEach((b)=>b.onclick=()=>{data.drinkCategories[+b.dataset.ci].items.push(emptyItem('beverage'));markDirty();render();});
   document.querySelectorAll('[data-settings]').forEach((i)=>i.addEventListener('input',()=>{data.settings[i.dataset.settings]=i.value;markDirty();}));
