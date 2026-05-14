@@ -28,7 +28,7 @@ function settingsSection(){
   const opening=t(s.openingHours||{});
   if(opening)rows.push(`<div class='info-row'><span class='icon'>🕒</span><span class='label'>${ui('opening_hours_label')||'Opening hours'}</span><span class='value'>${opening}</span></div>`);
 
-  if(s.instagramUrl)rows.push(`<a class='info-row' href='${s.instagramUrl}' target='_blank' rel='noopener noreferrer'><span class='icon'>📷</span><span class='label'>Instagram</span><span class='value'>@casaderin</span></a>`);
+  if(s.instagramUrl)rows.push(`<a class='info-row' href='${s.instagramUrl}' target='_blank' rel='noopener noreferrer'><span class='icon'>📷</span><span class='label'>${ui('instagram_label')||'Instagram'}</span><span class='value'>@casaderin</span></a>`);
 
   if(s.googleMapsUrl)rows.push(`<a class='maps-btn' href='${s.googleMapsUrl}' target='_blank' rel='noopener noreferrer'>🗺️ ${ui('open_google_maps')}</a>`);
 
