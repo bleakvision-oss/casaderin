@@ -29,12 +29,11 @@ async function suggestTranslationsForItem(target){
     alert('DEEPL_API_KEY manjka. Prevajanje trenutno ni nastavljeno.');
     return;
   }
-  const hasContent = translationTargets.some((lang)=>((target.name?.[lang] || '').trim() || (target.description?.[lang] || '').trim()));
+  const hasContent = translationTargets.some((lang)=>(target.description?.[lang] || '').trim());
   if (hasContent && !window.confirm('Nekatera ciljna polja (EN/IT/DE) že vsebujejo besedilo. Ali jih želiš prepisati?')) return;
-  const slName = (target.name?.sl || '').trim();
   const slDescription = (target.description?.sl || '').trim();
-  if (!slName && !slDescription) {
-    alert('Manjka slovensko besedilo za prevod.');
+  if (!slDescription) {
+    alert('Manjka slovenski opis za prevod.');
     return;
   }
   const translate = async (text, targetLang) => {
@@ -45,14 +44,8 @@ async function suggestTranslationsForItem(target){
   };
   try {
     for (const lang of translationTargets) {
-      if (slName) {
-        target.name = target.name || {};
-        target.name[lang] = await translate(slName, langToDeepL[lang]);
-      }
-      if (slDescription) {
-        target.description = target.description || {};
-        target.description[lang] = await translate(slDescription, langToDeepL[lang]);
-      }
+      target.description = target.description || {};
+      target.description[lang] = await translate(slDescription, langToDeepL[lang]);
     }
     markDirty();
     render();
