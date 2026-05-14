@@ -13,4 +13,35 @@ document.getElementById('addDrink').onclick=()=>{data.drinks.push({id:crypto.ran
 document.getElementById('save').onclick=save;}
 async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';document.getElementById('msg').className=r.ok?'success':'';}
 async function load(){data=await fetch('/api/menu').then(r=>r.json());document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');render();}
-document.getElementById('loginBtn').onclick=async()=>{const r=await fetch('/api/admin/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:document.getElementById('pwd').value})});const j=await r.json();if(!r.ok){document.getElementById('loginErr').textContent=j.error;return;}token=j.token;localStorage.setItem('adminToken',token);load();};if(token)load();
+async function login(){
+  const loginErr=document.getElementById('loginErr');
+  loginErr.textContent='';
+  const password=document.getElementById('pwd').value;
+
+  try{
+    const r=await fetch('/.netlify/functions/admin-login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password})
+    });
+
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){
+      loginErr.textContent=j.error||'Napačno geslo';
+      return;
+    }
+
+    if(!j.token){
+      loginErr.textContent='Napaka strežnika';
+      return;
+    }
+
+    token=j.token;
+    localStorage.setItem('adminToken',token);
+    await load();
+  }catch(_e){
+    loginErr.textContent='Napaka strežnika. Poskusite znova.';
+  }
+}
+
+document.getElementById('loginBtn').onclick=login;if(token)load();
