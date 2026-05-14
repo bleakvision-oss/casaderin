@@ -87,21 +87,32 @@ async function isTranslationConfigured(){try{const r=await fetch('/.netlify/func
 async function suggest(item){
   const canTranslate=await isTranslationConfigured();
   if(!canTranslate){
-    alert('Prevajanje trenutno ni nastavljeno. Dodaj DEEPL_API_KEY v Netlify environment variables.');
+    alert('Prevajanje trenutno ni nastavljeno.');
     return;
   }
+  const errors=[];
   for(const lang of ['en','it','de']){
-    const hasExistingName=hasText(item.name?.[lang]);
-    const hasExistingDescription=hasText(item.description?.[lang]);
-    if((hasExistingName||hasExistingDescription)&&!confirm(`${lang.toUpperCase()} prevod že obstaja. Želite zamenjati besedilo?`))continue;
-    const [n,d]=await Promise.all([tr(item.name.sl,lang),tr(item.description.sl,lang)]);
-    if(n) item.name[lang]=n;
-    if(d) item.description[lang]=d;
+    const langLabel=lang.toUpperCase();
+    const slName=item.name?.sl||'';
+    const slDescription=item.description?.sl||'';
+    if(hasText(slName)){
+      const hasExistingName=hasText(item.name?.[lang]);
+      if(!hasExistingName||confirm(`Polje imena za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
+        try{item.name[lang]=await tr(slName,lang);}catch(e){errors.push(`${langLabel} ime: ${e.message}`);}
+      }
+    }
+    if(hasText(slDescription)){
+      const hasExistingDescription=hasText(item.description?.[lang]);
+      if(!hasExistingDescription||confirm(`Polje opisa za ${langLabel} že vsebuje besedilo. Želite prepisati?`)){
+        try{item.description[lang]=await tr(slDescription,lang);}catch(e){errors.push(`${langLabel} opis: ${e.message}`);}
+      }
+    }
   }
+  if(errors.length) alert(`Nekateri prevodi niso uspeli:\n- ${errors.join('\n- ')}`);
   markDirty();
   render();
 }
-async function tr(text,lang){const map={en:'EN',it:'IT',de:'DE'};const r=await fetch('/.netlify/functions/translate-suggest',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,targetLang:map[lang]})});const j=await r.json();if(!r.ok){alert(j.error||'Napaka prevoda');return '';}return j.text;}
+async function tr(text,lang){const map={en:'EN',it:'IT',de:'DE'};const r=await fetch('/.netlify/functions/translate-suggest',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,targetLang:map[lang]})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Napaka prevoda');if(!j.text)throw new Error('Prevod ni bil vrnjen');return j.text;}
 function render(){const app=document.getElementById('app');app.innerHTML=[settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),section('drinks','beverage'),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button> <span id='msg'></span></div>"].join('');bind();}
 async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';if(r.ok) clearDirty();}
 async function load(){data=await fetch('/api/menu').then(r=>r.json());data.dishLibrary=data.dishLibrary||[];data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');clearDirty();render();}
