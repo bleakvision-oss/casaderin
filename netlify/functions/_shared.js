@@ -52,7 +52,8 @@ export const UI = {
   open_google_maps: { sl: 'Odpri v Google Maps', en: 'Open in Google Maps', it: 'Apri in Google Maps', de: 'In Google Maps öffnen' },
   phone_label: { sl: 'Telefon', en: 'Phone', it: 'Telefono', de: 'Telefon' },
   address_label: { sl: 'Naslov', en: 'Address', it: 'Indirizzo', de: 'Adresse' },
-  opening_hours_label: { sl: 'Delovni čas', en: 'Opening hours', it: 'Orari', de: 'Öffnungszeiten' }
+  opening_hours_label: { sl: 'Odpiralni čas', en: 'Opening hours', it: 'Orari di apertura', de: 'Öffnungszeiten' },
+  instagram_label: { sl: 'Instagram', en: 'Instagram', it: 'Instagram', de: 'Instagram' }
 };
 
 const item = (id, nameKey, desc, price, allergens = []) => ({ id, type: nameKey, sortOrder: 0, name: { sl: UI[nameKey]?.sl || '', en: UI[nameKey]?.en || '', it: UI[nameKey]?.it || '', de: UI[nameKey]?.de || '' }, description: desc, price, status: 'available', allergens });
