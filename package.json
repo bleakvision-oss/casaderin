@@ -1,0 +1,16 @@
+{
+  "name": "casaderin-menu",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'Static build ready'"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.37.0"
+  }
+}
