@@ -1,4 +1,8 @@
-let token = localStorage.getItem('adminToken') || '';
+const TOKEN_KEY='adminToken';
+const TOKEN_EXP_KEY='adminTokenExpiresAt';
+const SESSION_MS=8*60*60*1000;
+
+let token = '';
 let data = null; let dirty = false;
 const langs = ['sl', 'en', 'it', 'de'];
 const t = (o, k = 'sl') => o?.[k] || o?.sl || '';
@@ -13,6 +17,40 @@ const syncFlags = (x)=>{x.hidden=x.status==='hidden';x.soldOut=x.status==='sold_
 const translationTargets = ['en', 'it', 'de'];
 const langToDeepL = { en: 'EN', it: 'IT', de: 'DE' };
 
+function clearSession(){
+  token='';
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(TOKEN_EXP_KEY);
+}
+
+function setSession(nextToken){
+  token=nextToken;
+  localStorage.setItem(TOKEN_KEY,nextToken);
+  localStorage.setItem(TOKEN_EXP_KEY,String(Date.now()+SESSION_MS));
+}
+
+function applySessionFromStorage(){
+  const storedToken=localStorage.getItem(TOKEN_KEY);
+  const expiresAt=Number(localStorage.getItem(TOKEN_EXP_KEY)||0);
+  if(!storedToken||!expiresAt||Date.now()>=expiresAt){
+    clearSession();
+    return false;
+  }
+  token=storedToken;
+  return true;
+}
+
+function showLogin(message=''){
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginErr').textContent=message;
+}
+
+function handleUnauthorized(){
+  clearSession();
+  showLogin('Seja je potekla. Prosimo, prijavite se ponovno.');
+}
+
 function statusPills(x){return `<div class='inline quick-status'>${statusKeys.map((s)=>`<button class='btn status ${statusClass[s]} ${x.status===s?'active':''}' data-status='${s}'>${t(data.translations[`status_${s}`])}</button>`).join('')}</div>`;}
 function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
 function row(section, i, x, drinkCatIdx=null){
@@ -23,19 +61,13 @@ function section(key,titleKey){const arr=data.sections[key]||[];return `<details
 function drinksSection(){return `<details class='card' open><summary><h3>${t(data.translations.beverage)}</h3></summary>${(data.drinkCategories||[]).map((cat,ci)=>`<details class='card' open><summary><strong>${t(cat.title)}</strong></summary>${(cat.items||[]).map((x,i)=>row('drinks',i,x,ci)).join('')}<button class='btn add-drink' data-ci='${ci}'>+ ${t(data.translations.add)}</button></details>`).join('')}</details>`;}
 function settingsCard(){const s=data.settings;return `<details class='card' id='restaurant-settings' open><summary><h3>Restaurant settings</h3></summary><label>Restaurant name<input data-settings='restaurantName' value='${s.restaurantName||''}'></label><label>Phone number<input data-settings='phone' value='${s.phone||''}'></label><label>Address<input data-settings='address' value='${s.address||''}'></label><label>Google Maps URL<input data-settings='googleMapsUrl' value='${s.googleMapsUrl||''}'></label><label>Instagram URL<input data-settings='instagramUrl' value='${s.instagramUrl||''}'></label>${langFields(s,'openingHours')}${langFields(s,'footerText')}<label>Optional hero image URL<input data-settings='heroImageUrl' value='${s.heroImageUrl||''}'></label></details>`;}
 function resolveTarget(el){const s=el.dataset.s,i=+el.dataset.i,c=el.dataset.c;return c!==''?data.drinkCategories[+c].items[i]:data.sections[s][i];}
-async function suggestTranslationsForItem(target){
+async function suggestTranslationsForItem(target){/* unchanged */
   const availability = await fetch('/.netlify/functions/translate-suggest').then((r)=>r.json().catch(()=>({})));
-  if (!availability.configured) {
-    alert('DEEPL_API_KEY manjka. Prevajanje trenutno ni nastavljeno.');
-    return;
-  }
+  if (!availability.configured) { alert('DEEPL_API_KEY manjka. Prevajanje trenutno ni nastavljeno.'); return; }
   const hasContent = translationTargets.some((lang)=>(target.description?.[lang] || '').trim());
   if (hasContent && !window.confirm('Nekatera ciljna polja (EN/IT/DE) že vsebujejo besedilo. Ali jih želiš prepisati?')) return;
   const slDescription = (target.description?.sl || '').trim();
-  if (!slDescription) {
-    alert('Manjka slovenski opis za prevod.');
-    return;
-  }
+  if (!slDescription) { alert('Manjka slovenski opis za prevod.'); return; }
   const translate = async (text, targetLang) => {
     const r = await fetch('/.netlify/functions/translate-suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, targetLang }) });
     const j = await r.json().catch(()=>({}));
@@ -43,25 +75,33 @@ async function suggestTranslationsForItem(target){
     return j.text;
   };
   try {
-    for (const lang of translationTargets) {
-      target.description = target.description || {};
-      target.description[lang] = await translate(slDescription, langToDeepL[lang]);
-    }
-    markDirty();
-    render();
-  } catch (e) {
-    alert(e.message || 'Napaka pri prevajanju.');
-  }
+    for (const lang of translationTargets) { target.description = target.description || {}; target.description[lang] = await translate(slDescription, langToDeepL[lang]); }
+    markDirty(); render();
+  } catch (e) { alert(e.message || 'Napaka pri prevajanju.'); }
 }
-function bind(){document.querySelectorAll('.admin-item').forEach((el)=>{const target=resolveTarget(el);el.querySelectorAll('input').forEach((inp)=>inp.addEventListener('input',()=>{markDirty();const {f,l}=inp.dataset;if(l){target[f]=target[f]||{};target[f][l]=inp.value;} else target[f]=f==='sortOrder'?Number(inp.value||0):inp.value;}));el.querySelectorAll('[data-status]').forEach((b)=>b.onclick=()=>{target.status=b.dataset.status;syncFlags(target);markDirty();render();});el.querySelectorAll('[data-a]').forEach((b)=>b.onclick=()=>{markDirty();target.allergens=target.allergens||[];const idx=target.allergens.indexOf(b.dataset.a);if(idx>=0)target.allergens.splice(idx,1);else target.allergens.push(b.dataset.a);render();});el.querySelector('.suggest').onclick=()=>suggestTranslationsForItem(target);el.querySelector('.del').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;if(c!=='')data.drinkCategories[+c].items.splice(i,1);else data.sections[s].splice(i,1);render();};el.querySelector('.up').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];}render();};el.querySelector('.down').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];}render();};});
+function bind(){
+  document.querySelectorAll('.admin-item').forEach((el)=>{const target=resolveTarget(el);el.querySelectorAll('input').forEach((inp)=>inp.addEventListener('input',()=>{markDirty();const {f,l}=inp.dataset;if(l){target[f]=target[f]||{};target[f][l]=inp.value;} else target[f]=f==='sortOrder'?Number(inp.value||0):inp.value;}));el.querySelectorAll('[data-status]').forEach((b)=>b.onclick=()=>{target.status=b.dataset.status;syncFlags(target);markDirty();render();});el.querySelectorAll('[data-a]').forEach((b)=>b.onclick=()=>{markDirty();target.allergens=target.allergens||[];const idx=target.allergens.indexOf(b.dataset.a);if(idx>=0)target.allergens.splice(idx,1);else target.allergens.push(b.dataset.a);render();});el.querySelector('.suggest').onclick=()=>suggestTranslationsForItem(target);el.querySelector('.del').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;if(c!=='')data.drinkCategories[+c].items.splice(i,1);else data.sections[s].splice(i,1);render();};el.querySelector('.up').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];}render();};el.querySelector('.down').onclick=()=>{markDirty();const c=el.dataset.c,s=el.dataset.s,i=+el.dataset.i;const arr=c!==''?data.drinkCategories[+c].items:data.sections[s];if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];}render();};});
   document.querySelectorAll('[data-add]').forEach((b)=>b.onclick=()=>{data.sections[b.dataset.add].push(emptyItem(b.dataset.add));markDirty();render();});
   document.querySelectorAll('[data-ci]').forEach((b)=>b.onclick=()=>{data.drinkCategories[+b.dataset.ci].items.push(emptyItem('beverage'));markDirty();render();});
   document.querySelectorAll('[data-settings]').forEach((i)=>i.addEventListener('input',()=>{data.settings[i.dataset.settings]=i.value;markDirty();}));
   document.querySelectorAll('#restaurant-settings [data-f][data-l]').forEach((i)=>i.addEventListener('input',()=>{const {f,l}=i.dataset;data.settings[f]=data.settings[f]||{};data.settings[f][l]=i.value;markDirty();}));
   document.getElementById('save').onclick=save;
+  document.getElementById('logoutBtn').onclick=()=>{clearSession();showLogin();};
 }
-function render(){document.getElementById('app').innerHTML=[settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),drinksSection(),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button><span id='msg'></span></div>"].join('');bind();}
-async function save(){const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';if(r.ok)clearDirty();}
-async function load(){data=await fetch('/api/menu').then(r=>r.json());data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};(Object.values(data.sections||{}).flat()).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);});(data.drinkCategories||[]).forEach((c)=>(c.items||[]).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);}));document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');clearDirty();render();}
-async function login(){const loginErr=document.getElementById('loginErr');loginErr.textContent='';const password=document.getElementById('pwd').value;const r=await fetch('/.netlify/functions/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});const j=await r.json().catch(()=>({}));if(!r.ok)return loginErr.textContent=j.error||'Napačno geslo';token=j.token;localStorage.setItem('adminToken',token);await load();}
-document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();await login();});if(token)load();
+function render(){document.getElementById('app').innerHTML=["<div class='admin-toolbar'><button class='btn' id='logoutBtn'>Odjava</button></div>",settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),drinksSection(),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button><span id='msg'></span></div>"].join('');bind();}
+async function save(){
+  const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});
+  if(r.status===401){handleUnauthorized();return;}
+  document.getElementById('msg').textContent=r.ok?'Shranjeno':'Napaka';
+  if(r.ok)clearDirty();
+}
+async function load(){
+  data=await fetch('/api/menu').then(r=>r.json());
+  data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};
+  (Object.values(data.sections||{}).flat()).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);});
+  (data.drinkCategories||[]).forEach((c)=>(c.items||[]).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);}));
+  document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');clearDirty();render();
+}
+async function login(){const loginErr=document.getElementById('loginErr');loginErr.textContent='';const password=document.getElementById('pwd').value;const r=await fetch('/.netlify/functions/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});const j=await r.json().catch(()=>({}));if(!r.ok)return loginErr.textContent=j.error||'Napačno geslo';setSession(j.token);await load();}
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();await login();});
+if(applySessionFromStorage())load(); else showLogin();
