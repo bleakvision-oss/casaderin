@@ -136,7 +136,7 @@ img{max-width:100%;height:auto}
   grid-template-columns:240px minmax(0,1fr);
   gap:24px;
   align-items:start;
-  max-width:1400px;
+  max-width:1720px;
   margin:0 auto;
   padding:18px 20px 120px;
 }
@@ -200,7 +200,7 @@ img{max-width:100%;height:auto}
 .mobile-nav-label{display:none}
 
 /* ── PANEL ── */
-.admin-main{min-width:0}
+.admin-main{min-width:0;max-width:1400px;width:100%}
 .panel-shell{
   background:#faf6ec;
   border:1px solid #e0d5b8;
@@ -259,12 +259,21 @@ img{max-width:100%;height:auto}
   display:flex;
   gap:12px;
   align-items:center;
-  justify-content:center;
+  justify-content:space-between;
   z-index:1000;
   box-shadow:0 -8px 20px rgba(37,35,29,.22);
 }
+.savebar-actions{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  width:min(640px,100%);
+  gap:12px;
+}
 .savebar .btn{background:#fffaf0;border:1px solid rgba(255,255,255,.25);color:#2f3a2e;padding:9px 20px}
-.savebar .btn#save{background:#3d5240;color:#e4d9c2;border:none}
+.savebar .btn#save{background:#3d5240;color:#e4d9c2;border:none;justify-self:center}
+.savebar .btn#undo{justify-self:start}
+.savebar .btn#cancel{justify-self:end}
 .save-status{font-weight:700;color:#f4ecd8;font-size:.9rem}
 .save-status.is-dirty{color:#f3e4bf}
 .save-status.is-saving{color:#f4ecd8}
@@ -456,8 +465,21 @@ img{max-width:100%;height:auto}
 .advanced-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px;
+  gap:10px 12px;
   margin-top:10px;
+}
+.advanced-grid input{
+  background:#fffdf8;
+  border-color:#cdb98e;
+}
+.advanced .inline .btn.suggest{
+  background:#efe4cf;
+  border-color:#bfa678;
+  color:#3f3422;
+  font-weight:700;
+}
+.advanced .inline .btn.suggest:hover{
+  background:#e8dcc5;
 }
 
 /* sr-only label hack */
@@ -483,7 +505,8 @@ img{max-width:100%;height:auto}
   .item-status-group{justify-content:flex-start}
   .compact-field,.compact-field input{width:100%}
   .advanced-grid{grid-template-columns:1fr}
-  .savebar{padding:10px 14px}
+  .savebar{padding:10px 14px;justify-content:space-between}
+  .savebar-actions{width:100%}
 }
 @media(max-width:760px){
   .hero-media img{max-height:180px;width:100%;height:auto;max-width:100%;object-fit:contain;object-position:center;border-radius:10px}
@@ -509,8 +532,10 @@ img{max-width:100%;height:auto}
   .row{grid-template-columns:1fr 1fr}
   .row label:last-child{grid-column:1/-1}
   .quick-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-  .savebar{padding:10px;justify-content:space-between}
-  .savebar .btn{flex:1}
+  .savebar{padding:10px;justify-content:space-between;align-items:flex-end;flex-direction:column}
+  .savebar-actions{grid-template-columns:1fr;gap:8px}
+  .savebar .btn{width:100%;justify-self:stretch}
+  .savebar .btn#undo,.savebar .btn#save,.savebar .btn#cancel{justify-self:stretch}
   .save-status{min-width:100px;text-align:right}
 }
 @media(max-width:480px){
@@ -524,3 +549,8 @@ img{max-width:100%;height:auto}
 .import-msg{margin-top:10px;font-size:.95rem;color:var(--color-text-muted);}
 .import-msg.success{color:#1f7a3a;}
 .import-msg.error{color:#b42318;}
+
+.qr-card{display:grid;gap:12px;max-width:560px}
+.qr-card h3{margin:0;font-size:1.05rem;color:#1e2e1a}
+.qr-url{margin:0;color:#746b5a;word-break:break-all}
+.qr-image{width:min(320px,100%);border-radius:12px;border:1px solid #d8c7a0;background:#fff;padding:10px}
