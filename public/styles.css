@@ -62,14 +62,34 @@ fieldset{border:1px solid #e7ddd2;border-radius:10px;padding:10px;margin:8px 0}
 .admin-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
 .quick-status .btn{padding:12px 14px;min-height:46px;font-weight:700}
 details>summary{cursor:pointer;list-style:none}
-.status.ok{border-color:#8ca57f;background:#dce8d6;color:#36502f}
-.status.warn{border-color:#c6a74f;background:#efe2b7;color:#7a5f18}
-.status.bad{border-color:#b76c63;background:#ead0cd;color:#7d332b}
-.status.muted{border-color:#a2a2a2;background:#f3f3f3;color:#555}
-.status.ok.active{background:#cfe0c7;color:#36502f}
-.status.warn.active{background:#e6d59d;color:#7a5f18}
-.status.bad.active{background:#dfc0bc;color:#7d332b}
-.status.muted.active{background:#7d857f;color:#fff}
+.admin-content .status.ok,
+.admin-content .status.warn,
+.admin-content .status.bad,
+.admin-content .status.muted{
+  background:transparent;
+  color:#7d715d;
+  border:1px solid rgba(120,110,90,.35);
+}
+.admin-content .status.ok.active{
+  background:#4f8f4f;
+  color:#fff;
+  border-color:#4f8f4f;
+}
+.admin-content .status.warn.active{
+  background:#d6a72d;
+  color:#1f1d18;
+  border-color:#d6a72d;
+}
+.admin-content .status.bad.active{
+  background:#b95a50;
+  color:#fff;
+  border-color:#b95a50;
+}
+.admin-content .status.muted.active{
+  background:#77736a;
+  color:#fff;
+  border-color:#77736a;
+}
 .pill-wrap{display:flex;gap:6px;flex-wrap:wrap}
 .pill{border:1px solid #d8cfbf;border-radius:999px;padding:3px 8px;background:#f2efe5;cursor:pointer;font-size:11px;color:#6e6758}
 .pill.active{background:#e6eee0;border-color:#a9b89e;color:#394833}
@@ -270,6 +290,24 @@ img{max-width:100%;height:auto}
   border-radius:14px;
   padding:12px 14px;
   box-shadow:0 3px 12px rgba(40,35,25,.05);
+}
+
+.admin-item-card.status-available{
+  border-color:rgba(79,143,79,.45);
+  background:linear-gradient(90deg, rgba(79,143,79,.07), #fffdf7 22%);
+}
+.admin-item-card.status-low{
+  border-color:rgba(214,167,45,.55);
+  background:linear-gradient(90deg, rgba(214,167,45,.10), #fffdf7 22%);
+}
+.admin-item-card.status-sold_out{
+  border-color:rgba(185,90,80,.55);
+  background:linear-gradient(90deg, rgba(185,90,80,.10), #fffdf7 22%);
+}
+.admin-item-card.status-hidden{
+  border-color:rgba(119,115,106,.5);
+  background:linear-gradient(90deg, rgba(119,115,106,.10), #fffdf7 22%);
+  opacity:.72;
 }
 .admin-item-card::before{
   content:'';position:absolute;top:8px;left:8px;
