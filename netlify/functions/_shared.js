@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 
 const MENU_KEY = 'menu-data-v2';
+const ANALYTICS_KEY = 'menu-analytics-v1';
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
 
 export const LANGS = ['sl', 'en', 'it', 'de'];
@@ -130,6 +131,8 @@ const defaultData = { updatedAt: new Date().toISOString(), dishLibrary: [], tran
 
 export async function loadMenu() { const s = getStore('menu'); const d = await s.get(MENU_KEY, { type: 'json' }); if (!d) { await s.setJSON(MENU_KEY, defaultData); return defaultData; } const normalized = normalizeMenuData(d); if (JSON.stringify(normalized) !== JSON.stringify(d)) await s.setJSON(MENU_KEY, normalized); return normalized; }
 export async function saveMenu(data) { const s = getStore('menu'); const payload = upsertDishLibrary({ ...normalizeMenuData(data), updatedAt: new Date().toISOString() }); await s.setJSON(MENU_KEY, payload); return payload; }
+export async function appendAnalyticsView(view) { const s = getStore('menu'); const existing = await s.get(ANALYTICS_KEY, { type: 'json' }) || []; const next = [...existing, view].slice(-5000); await s.setJSON(ANALYTICS_KEY, next); return next; }
+export async function loadAnalytics() { const s = getStore('menu'); return await s.get(ANALYTICS_KEY, { type: 'json' }) || []; }
 export function makeToken() { const secret = process.env.SESSION_SECRET; const payload = `${Date.now() + TOKEN_TTL_MS}`; const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex'); return `${payload}.${sig}`; }
 export function verifyToken(token) { const secret = process.env.SESSION_SECRET; if (!token || !secret) return false; const [exp, sig] = token.split('.'); if (!exp || !sig || Date.now() > Number(exp)) return false; const expected = crypto.createHmac('sha256', secret).update(exp).digest('hex'); return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)); }
 export const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });

@@ -26,3 +26,13 @@
   from = "/api/admin/menu"
   to = "/.netlify/functions/menu-save"
   status = 200
+
+[[redirects]]
+  from = "/api/analytics/track"
+  to = "/.netlify/functions/analytics-track"
+  status = 200
+
+[[redirects]]
+  from = "/api/analytics/summary"
+  to = "/.netlify/functions/analytics-summary"
+  status = 200
