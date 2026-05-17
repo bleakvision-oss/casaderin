@@ -64,3 +64,26 @@ input,textarea,select{width:100%;padding:8px;border:1px solid #d7ccc0;border-rad
 img{max-width:100%;height:auto}
 
 .drink-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(216,201,158,.42)}.drink-row:last-child{padding-bottom:0;border-bottom:0}.drink-main{min-width:0}.drink-desc{margin-top:3px;color:var(--color-muted);font-style:italic;font-size:.9rem;line-height:1.35}
+
+/* Admin dashboard redesign */
+.admin-shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start;max-width:1300px;margin:0 auto;padding:12px 0 110px}
+.sidebar{position:sticky;top:12px;background:#f6f0e3;border:1px solid #ddcfb4;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(47,58,46,.08)}
+.brand-mini{font-weight:700;font-family:var(--font-serif);margin-bottom:10px}
+.sidebar nav{display:grid;gap:8px}.sidebar h5{margin:12px 0 2px;color:#5f7156;letter-spacing:.08em}
+.nav-link{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer}
+.nav-link:hover{background:#ece5d6}
+.admin-main{min-width:0}
+.panel-shell{background:#fff9ef;border:1px solid #e4d7bf;border-radius:16px;padding:18px;box-shadow:0 12px 28px rgba(47,58,46,.08)}
+.panel-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.panel-head h2{margin:0}.panel-head p{margin:2px 0 0;color:#6e6250}
+.item-list{display:grid;gap:10px}
+.admin-item{border-radius:14px;padding:12px;background:#fff;border:1px solid #e4d7bf}
+.item-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.item-left{display:flex;gap:10px;min-width:0;flex:1}
+.drag-handle{border:0;background:#efe7d5;border-radius:8px;padding:6px 9px;cursor:pointer}
+.item-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.compact-field{width:94px}
+.item-allergens{margin-top:8px}
+.advanced{margin-top:8px;border-top:1px dashed #dac9aa;padding-top:8px}
+.mobile-nav-label{display:none}
+@media(max-width:960px){.admin-shell{grid-template-columns:1fr}.sidebar{position:static}.sidebar nav{display:none}.mobile-nav-label{display:block}.savebar{left:0;right:0}.panel-head{flex-direction:column}.item-top{flex-direction:column}.item-right{justify-content:flex-start}}
