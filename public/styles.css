@@ -120,3 +120,33 @@ details>summary h3{display:inline}
   .intro-block{grid-template-columns:1fr 340px;align-items:start}
   .updated{grid-column:1/-1}
 }
+
+
+.brand{font-family:'Cormorant Garamond','Georgia','Times New Roman',serif;font-weight:600;letter-spacing:.4px}
+#today{font-size:.93rem;margin-top:2px}
+
+.hero-intro{display:grid;gap:16px}
+.hero-media{margin:0;border-radius:22px;overflow:hidden;border:1px solid var(--border);box-shadow:0 18px 38px rgba(86,109,94,.17);background:#eef4eb}
+.hero-media img{display:block;width:100%;height:clamp(210px,38vw,360px);object-fit:cover;filter:saturate(.92) contrast(.98)}
+
+.item{display:grid;grid-template-columns:1fr;gap:10px}
+.item-copy{display:grid;gap:4px}
+.item-desc{color:#556056}
+.item-image-wrap{border-radius:12px;overflow:hidden;border:1px solid #dde5d8;background:#f2f5ef}
+.item-image{display:block;width:100%;height:150px;object-fit:cover}
+
+.card h3{font-family:'Cormorant Garamond','Georgia','Times New Roman',serif;font-size:1.45rem;font-weight:600;letter-spacing:.1px}
+.visitor-card h3{font-family:'Cormorant Garamond','Georgia','Times New Roman',serif;font-weight:600}
+.price{font-size:1.03rem;letter-spacing:.2px}
+
+@media(min-width:760px){
+  .hero-intro{grid-template-columns:1.2fr 1fr;align-items:start}
+  .hero-intro .intro-block{height:100%}
+  .item{grid-template-columns:130px 1fr;align-items:start}
+  .item-image{height:115px}
+}
+
+@media(max-width:700px){
+  .hero-media img{height:210px}
+  .lang{top:74px}
+}

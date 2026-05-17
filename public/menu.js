@@ -11,7 +11,7 @@ const ui=(k)=>t(state.data.translations?.[k]||fallbackUi[k]||{});
 const allergenLabel=(id)=>t(state.data.allergens?.[id]||{sl:id});
 const statusBadge=(x)=>x.status==='low'?`<span class='badge low'>${ui('status_low')}</span>`:x.status==='sold_out'?`<span class='badge sold'>${ui('status_sold_out')}</span>`:'';
 const allergenPills=(x)=>x.allergens?.length?`<div class='allergens'>${x.allergens.map((a)=>`<span class='all-pill'>${allergenLabel(a)}</span>`).join('')}</div>`:'';
-const item=(x)=>{if(x.status==='hidden'||x.hidden)return'';const sold=x.status==='sold_out'||x.soldOut;return `<article class='item ${sold?'sold-dim':''}'><h4>${t(x.name)} ${statusBadge(x)}</h4><div>${t(x.description||{})}</div><div class='price'>${x.price} €</div>${allergenPills(x)}</article>`;};
+const item=(x)=>{if(x.status==='hidden'||x.hidden)return'';const sold=x.status==='sold_out'||x.soldOut;const image=x.imageUrl?`<div class='item-image-wrap'><img class='item-image' src='${x.imageUrl}' alt='${t(x.name)}' loading='lazy'></div>`:'';return `<article class='item ${sold?'sold-dim':''}'>${image}<div class='item-copy'><h4>${t(x.name)} ${statusBadge(x)}</h4><div class='item-desc'>${t(x.description||{})}</div><div class='price'>${x.price} €</div>${allergenPills(x)}</div></article>`;};
 const card=(title,html)=>`<section class='card'><h3>${title}</h3>${html}</section>`;
 
 function formatUpdatedAt(iso){
@@ -45,7 +45,9 @@ function settingsSection(){
 
 function introSection(){
   const updated=formatUpdatedAt(state.data.updatedAt);
-  return `<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
+  const st=state.data.settings||{};
+  const hero=st.heroImageUrl?`<figure class='hero-media'><img src='${st.heroImageUrl}' alt='${st.restaurantName||'Casa de Rin'}' loading='eager'></figure>`:'';
+  return `<section class='hero-intro'>${hero}<div class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</div></section>`;
 }
 
 
