@@ -120,3 +120,9 @@ details>summary h3{display:inline}
   .intro-block{grid-template-columns:1fr 340px;align-items:start}
   .updated{grid-column:1/-1}
 }
+
+
+.hero-media{border-radius:16px;overflow:hidden;border:1px solid #e8d8c5;background:linear-gradient(145deg,#fffaf4,#f6ecdf);box-shadow:0 8px 22px rgba(126,88,67,.12)}
+.hero-media img{display:block;width:100%;height:auto;max-height:380px;object-fit:contain;background:#fff5e8}
+.help-text{display:block;margin-top:6px;color:#6c635d;font-weight:500;font-size:12px;line-height:1.35}
+@media(max-width:700px){.hero-media img{max-height:240px}}

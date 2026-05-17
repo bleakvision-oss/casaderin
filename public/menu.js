@@ -43,9 +43,16 @@ function settingsSection(){
   return `<aside class='visitor-card'><h3>${s.restaurantName||'Casa de Rin'}</h3><div class='visitor-grid'>${rows.join('')}</div></aside>`;
 }
 
+
+function heroSection(){
+  const heroUrl=(state.data.settings?.heroImageUrl||'').trim();
+  if(!heroUrl)return '';
+  return `<section class='hero-media'><img src='${heroUrl}' alt='Casa de Rin' loading='lazy' decoding='async' referrerpolicy='no-referrer' onerror="this.closest('section.hero-media')?.remove();"></section>`;
+}
+
 function introSection(){
   const updated=formatUpdatedAt(state.data.updatedAt);
-  return `<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
+  return `${heroSection()}<section class='intro-block'>${updated?`<p class='updated'>${updated}</p>`:''}${settingsSection()}</section>`;
 }
 
 
