@@ -55,7 +55,7 @@ function statusPills(x){return `<div class='inline quick-status'>${statusKeys.ma
 function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
 function row(section, i, x, drinkCatIdx=null){
   const path = drinkCatIdx===null ? `data.sections.${section}[${i}]` : `data.drinkCategories[${drinkCatIdx}].items[${i}]`;
-  return `<div class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}'><div class='inline'><small>${path}</small></div>${statusPills(x)}${langFields(x,'name')}${langFields(x,'description')}<div class='inline'><button class='btn suggest'>Predlagaj prevode</button></div><div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Cena<input data-f='price' value='${x.price||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div><fieldset><legend>${t(data.translations.allergens)}</legend>${allergenPills(x)}</fieldset><div class='inline'><button class='btn up'>↑</button><button class='btn down'>↓</button><button class='btn del'>Izbriši</button></div></div>`;
+  return `<div class='admin-item status-${x.status||'available'}' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}'><div class='inline'><small>${path}</small></div>${statusPills(x)}${langFields(x,'name')}${langFields(x,'description')}<div class='inline'><button class='btn suggest'>Predlagaj prevode</button></div><div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Cena<input data-f='price' value='${x.price||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div><fieldset><legend>${t(data.translations.allergens)}</legend>${allergenPills(x)}</fieldset><div class='inline'><button class='btn up'>↑</button><button class='btn down'>↓</button><button class='btn del'>Izbriši</button></div></div>`;
 }
 function section(key,titleKey){const arr=data.sections[key]||[];return `<details class='card' open><summary><h3>${t(data.translations[titleKey])}</h3></summary>${arr.map((x,i)=>row(key,i,x)).join('')}<button class='btn add' data-add='${key}'>+ ${t(data.translations.add)}</button></details>`;}
 function drinksSection(){return `<details class='card' open><summary><h3>${t(data.translations.beverage)}</h3></summary>${(data.drinkCategories||[]).map((cat,ci)=>`<details class='card' open><summary><strong>${t(cat.title)}</strong></summary>${(cat.items||[]).map((x,i)=>row('drinks',i,x,ci)).join('')}<button class='btn add-drink' data-ci='${ci}'>+ ${t(data.translations.add)}</button></details>`).join('')}</details>`;}
@@ -86,9 +86,12 @@ function bind(){
   document.querySelectorAll('[data-settings]').forEach((i)=>i.addEventListener('input',()=>{data.settings[i.dataset.settings]=i.value;markDirty();}));
   document.querySelectorAll('#restaurant-settings [data-f][data-l]').forEach((i)=>i.addEventListener('input',()=>{const {f,l}=i.dataset;data.settings[f]=data.settings[f]||{};data.settings[f][l]=i.value;markDirty();}));
   document.getElementById('save').onclick=save;
+  document.getElementById('exportBackup').onclick=exportBackup;
   document.getElementById('logoutBtn').onclick=()=>{clearSession();showLogin();};
 }
-function render(){document.getElementById('app').innerHTML=["<div class='admin-toolbar'><button class='btn' id='logoutBtn'>Odjava</button></div>",settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),drinksSection(),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button><span id='msg'></span></div>"].join('');bind();}
+function analyticsCard(){const a=data.analyticsSummary||{total:0,byLanguage:{},byDevice:{mobile:0,desktop:0},today:0,last7Days:0};return `<details class='card' open><summary><h3>Analytics</h3></summary><div class='analytics-grid'><div><strong>Skupaj ogledov:</strong> ${a.total||0}</div><div><strong>Ogledi danes:</strong> ${a.today||0}</div><div><strong>Zadnjih 7 dni:</strong> ${a.last7Days||0}</div><div><strong>Jeziki:</strong> SL ${a.byLanguage?.sl||0} · EN ${a.byLanguage?.en||0} · IT ${a.byLanguage?.it||0} · DE ${a.byLanguage?.de||0}</div><div><strong>Naprave:</strong> Mobile ${a.byDevice?.mobile||0} · Desktop ${a.byDevice?.desktop||0}</div></div></details>`;}
+function render(){document.getElementById('app').innerHTML=["<div class='admin-toolbar'><button class='btn' id='logoutBtn'>Odjava</button><button class='btn' id='exportBackup'>Izvozi backup</button></div>",analyticsCard(),settingsCard(),section('daily','section_daily'),section('lunch','lunch'),section('weekly','section_weekly'),section('desserts','dessert'),drinksSection(),"<div class='savebar'><button class='btn' id='save'>Shrani spremembe</button><span id='msg'></span></div>"].join('');bind();}
+function exportBackup(){const payload={sections:data.sections,items:data.sections,settings:data.settings,translations:data.translations,updatedAt:data.updatedAt,dishLibrary:data.dishLibrary||[],drinkCategories:data.drinkCategories||[],allergens:data.allergens||{}};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`casaderin-menu-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}
 async function save(){
   const r=await fetch('/api/admin/menu',{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify(data)});
   if(r.status===401){handleUnauthorized();return;}
@@ -96,7 +99,12 @@ async function save(){
   if(r.ok)clearDirty();
 }
 async function load(){
-  data=await fetch('/api/menu').then(r=>r.json());
+  const [menuRes, analyticsRes] = await Promise.all([
+    fetch('/api/menu').then(r=>r.json()),
+    fetch('/api/analytics/summary').then(r=>r.json()).catch(()=>({}))
+  ]);
+  data=menuRes;
+  data.analyticsSummary=analyticsRes;
   data.settings=data.settings||{restaurantName:'',phone:'',address:'',googleMapsUrl:'',instagramUrl:'',openingHours:{sl:'',en:'',it:'',de:''},footerText:{sl:'',en:'',it:'',de:''},heroImageUrl:''};
   (Object.values(data.sections||{}).flat()).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);});
   (data.drinkCategories||[]).forEach((c)=>(c.items||[]).forEach((x)=>{if(!x.status)x.status=x.hidden?'hidden':x.soldOut?'sold_out':x.lowStock?'low':'available';syncFlags(x);}));
