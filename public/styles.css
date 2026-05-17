@@ -450,9 +450,13 @@ img{max-width:100%;height:auto}
   .visitor-card,.menu-card{padding:12px}
   .info-row{grid-template-columns:18px 80px minmax(0,1fr);gap:7px}
   .item-head{flex-direction:column;align-items:flex-start;gap:8px}
-  .item-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px;max-width:100%;min-width:0}
-  .item-meta .badge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
-  .item-meta .price{white-space:nowrap;text-align:left}
+  .item-meta,
+  .item-meta-row,
+  .price-status-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;max-width:100%;min-width:0}
+  .item-meta .badge,
+  .status-badge{max-width:100%;white-space:normal;overflow-wrap:anywhere;flex-shrink:0}
+  .item-meta .price,
+  .price-status-row .price{margin-left:auto;text-align:right;white-space:nowrap;font-weight:700}
   .row{grid-template-columns:1fr 1fr}
   .row label:last-child{grid-column:1/-1}
   .quick-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
