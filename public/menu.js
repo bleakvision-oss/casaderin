@@ -3,7 +3,7 @@ const fallbackUi={phone_label:{sl:'Telefon',en:'Phone',it:'Telefono',de:'Telefon
 const t=(obj)=>obj?.[state.lang]||obj?.sl||'';
 const ui=(k)=>t(state.data.translations?.[k]||fallbackUi[k]||{});
 const allergenLabel=(id)=>t(state.data.allergens?.[id]||{sl:id});
-const statusBadge=(x)=>x.status==='low'?`<span class='badge low'>${ui('status_low')}</span>`:x.status==='sold_out'?`<span class='badge sold'>${ui('status_sold_out')}</span>`:'';
+const statusBadge=(x)=>x.status==='low'?`<span class='badge low'>${ui('status_low')}</span>`:x.status==='sold_out'?`<span class='badge sold'>${ui('status_sold_out')}</span>`:`<span class='badge available'>${ui('status_available')}</span>`;
 const allergenPills=(x)=>x.allergens?.length?`<div class='allergens'>${x.allergens.map((a)=>`<span class='all-pill'>${allergenLabel(a)}</span>`).join('')}</div>`:'';
 const item=(x)=>{if(x.status==='hidden'||x.hidden)return'';const sold=x.status==='sold_out'||x.soldOut;const image=x.imageUrl?`<div class='item-image-wrap'><img class='item-image' src='${x.imageUrl}' alt='${t(x.name)}' loading='lazy'></div>`:'';return `<article class='item ${sold?'sold-dim':''} ${x.imageUrl?'has-image':'no-image'}'><div class='item-copy'><div class='item-head'><h4>${t(x.name)} ${statusBadge(x)}</h4><div class='price'>${x.price} €</div></div><div class='item-desc'>${t(x.description||{})}</div>${allergenPills(x)}</div>${image}</article>`;};
 const card=(title,html)=>`<section class='card'><h3><span class='diamond-sep' aria-hidden='true'></span>${title}<span class='diamond-sep' aria-hidden='true'></span></h3>${html||`<p class='muted'>—</p>`}</section>`;

@@ -1,7 +1,7 @@
 :root{--color-bg:#f0ebe0;--color-header:#dfe8d7;--color-header-text:#2f3a31;--color-card:#faf6ec;--color-border:#ddd0b0;--color-gold:#c4a84a;--color-text:#1a1610;--color-muted:#6e6250;--color-olive:#6f8b74;--color-sage:#8da58f;--font-serif:Georgia,"Times New Roman",serif;--font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 body{font-family:var(--font-sans);background:radial-gradient(circle at top,#f8f4ea,var(--color-bg));color:var(--color-text);margin:0;line-height:1.55}
-.menu-header{background:var(--color-header);padding:12px 16px 8px;position:sticky;top:0;border-bottom:1px solid #d8ceb5;z-index:10}
+.menu-header{background:var(--color-header);padding:12px 16px 8px;position:sticky;top:0;border-bottom:1px solid #d8ceb5;z-index:10;width:100%;max-width:100%;left:0;right:0}
 .gold-bar{height:1px;max-width:860px;margin:8px auto 0;background:linear-gradient(90deg,transparent,var(--color-gold),transparent)}
 .wrap{max-width:860px;margin:0 auto;padding:16px 20px}
 .brand{font-size:2rem;color:var(--color-header-text);font-weight:700;letter-spacing:.4px;font-family:var(--font-serif)}
@@ -38,8 +38,8 @@ body{font-family:var(--font-sans);background:radial-gradient(circle at top,#f8f4
 .price{font-weight:700;color:#3e3220;font-size:1.02rem;letter-spacing:.15px;white-space:nowrap;text-align:right}
 .item-image-wrap{border-radius:6px;overflow:hidden;border:1px solid #ddd4bf;background:#f2f5ef;width:100%}
 .item-image{display:block;width:100%;height:110px;object-fit:cover}
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.2px;background:#ece6d8;color:#4e4636;border:1px solid #d8c8a4}
-.badge.low{background:#f0f3e6;color:#5f6445;border-color:#dde2cd}.sold{background:#f5e9e7;color:#7f4d48;border-color:#e6ceca}
+.badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.25px;line-height:1.2;background:#ece6d8;color:#4e4636;border:1px solid #d8c8a4;white-space:nowrap;vertical-align:middle}
+.badge.available{background:#eaf4ea;color:#2f5f42;border-color:#bfd8c3}.badge.low{background:#f6edc8;color:#6f5510;border-color:#dfca7c}.badge.sold{background:#f8e2df;color:#8d3e3e;border-color:#dfb0aa}
 .allergens{font-size:11px;color:var(--color-muted);margin-top:2px;display:flex;gap:4px;flex-wrap:wrap}
 .all-pill{display:inline-block;background:#f7f1e5;border:1px solid #decfae;color:#655840;border-radius:999px;padding:2px 7px;font-size:10px}
 .menu-footer{margin-top:6px;text-align:center;color:#80735b;font-family:var(--font-serif);font-size:.95rem;letter-spacing:.25px}
@@ -47,4 +47,4 @@ body{font-family:var(--font-sans);background:radial-gradient(circle at top,#f8f4
 input,textarea,select{width:100%;padding:8px;border:1px solid #d7ccc0;border-radius:8px}label{font-size:13px;font-weight:600}fieldset{border:1px solid #e7ddd2;border-radius:10px;padding:10px;margin:8px 0}.row{display:grid;grid-template-columns:1fr 1fr 120px;gap:8px}.admin-item{border:1px solid #ecdcca;border-radius:12px;padding:10px;margin-bottom:10px;background:#fff}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .savebar{position:sticky;bottom:0;background:#fff;padding:10px;border-top:1px solid #eadfd2;display:flex;gap:10px;align-items:center;z-index:4}.savebar .btn{padding:14px 18px;font-size:16px}.admin-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px}
 .quick-status .btn{padding:10px 12px;min-height:40px}.status.active{background:var(--color-olive);color:#fff}details>summary{cursor:pointer;list-style:none}.status.ok.active{background:#4e8662;color:#fff}.status.warn.active{background:#c7b670;color:#263227}.status.bad.active{background:#a75a5a;color:#fff}.status.muted.active{background:#7d857f;color:#fff}.pill-wrap{display:flex;gap:6px;flex-wrap:wrap}.pill{border:1px solid #d7ccc0;border-radius:999px;padding:8px 10px;background:#fff}.pill.active{background:#edf4ed;border-color:#6b8d73}.sold-dim{opacity:.62}.drink-group{margin-bottom:14px;padding-bottom:8px;border-bottom:1px dashed #d8d0bd}.drink-group:last-child{border-bottom:0;padding-bottom:0;margin-bottom:2px}
-@media(max-width:760px){.wrap{padding:12px 14px}.brand{font-size:1.7rem}.grid{gap:11px}.item{padding:12px}.item.has-image{grid-template-columns:1fr}.lang button{min-width:50px;padding:6px 8px}.item-head{flex-direction:column;gap:3px}.price{font-size:.97rem;text-align:left}.card h3::before,.card h3::after{max-width:84px}}
+@media(max-width:760px){body{overflow-x:hidden}.menu-header{position:static;width:100%;max-width:100%;left:auto;right:auto}.wrap{padding:12px 14px}.brand{font-size:1.7rem}.grid{gap:11px}.item{padding:12px}.item.has-image{grid-template-columns:1fr}.lang button{min-width:50px;padding:6px 8px}.item-head{flex-direction:column;gap:4px}.badge{font-size:11px;padding:4px 10px}.price{font-size:.97rem;text-align:left}.card h3::before,.card h3::after{max-width:84px}}
