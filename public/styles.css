@@ -136,7 +136,7 @@ img{max-width:100%;height:auto}
   grid-template-columns:240px minmax(0,1fr);
   gap:24px;
   align-items:start;
-  max-width:1720px;
+  max-width:1860px;
   margin:0 auto;
   padding:18px 20px 120px;
 }
@@ -200,7 +200,7 @@ img{max-width:100%;height:auto}
 .mobile-nav-label{display:none}
 
 /* ── PANEL ── */
-.admin-main{min-width:0;max-width:1400px;width:100%}
+.admin-main{min-width:0;max-width:1600px;width:100%}
 .panel-shell{
   background:#faf6ec;
   border:1px solid #e0d5b8;
@@ -267,8 +267,9 @@ img{max-width:100%;height:auto}
   display:grid;
   grid-template-columns:1fr auto 1fr;
   align-items:center;
-  width:min(640px,100%);
-  gap:12px;
+  width:auto;
+  gap:10px;
+  justify-content:center;
 }
 .savebar .btn{background:#fffaf0;border:1px solid rgba(255,255,255,.25);color:#2f3a2e;padding:9px 20px}
 .savebar .btn#save{background:#3d5240;color:#e4d9c2;border:none;justify-self:center}
@@ -509,6 +510,14 @@ img{max-width:100%;height:auto}
   .savebar-actions{width:100%}
 }
 @media(max-width:760px){
+  .savebar{padding:8px 10px;justify-content:space-between;align-items:center;flex-direction:row;gap:10px}
+  .savebar-actions{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%;gap:6px}
+  .savebar .btn{padding:7px 10px;min-height:38px;font-size:.84rem}
+  .savebar .btn#undo{justify-self:start}
+  .savebar .btn#save{justify-self:center}
+  .savebar .btn#cancel{justify-self:end}
+  .save-status{min-width:88px;text-align:left;font-size:.82rem}
+
   .hero-media img{max-height:180px;width:100%;height:auto;max-width:100%;object-fit:contain;object-position:center;border-radius:10px}
 
   .menu-header,.header{position:static}
@@ -532,11 +541,6 @@ img{max-width:100%;height:auto}
   .row{grid-template-columns:1fr 1fr}
   .row label:last-child{grid-column:1/-1}
   .quick-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-  .savebar{padding:10px;justify-content:space-between;align-items:flex-end;flex-direction:column}
-  .savebar-actions{grid-template-columns:1fr;gap:8px}
-  .savebar .btn{width:100%;justify-self:stretch}
-  .savebar .btn#undo,.savebar .btn#save,.savebar .btn#cancel{justify-self:stretch}
-  .save-status{min-width:100px;text-align:right}
 }
 @media(max-width:480px){
   .allergens{flex-direction:row;align-items:flex-start}
