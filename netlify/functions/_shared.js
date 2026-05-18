@@ -80,6 +80,25 @@ function normalizeDrinkCategories(base) {
   return categories;
 }
 
+
+function normalizeCateringEntry(entry = {}) {
+  return {
+    id: entry.id || crypto.randomUUID(),
+    datum: String(entry.datum || ''),
+    ura: String(entry.ura || ''),
+    stranka: String(entry.stranka || ''),
+    kontakt: String(entry.kontakt || ''),
+    lokacija: String(entry.lokacija || ''),
+    stOseb: Number(entry.stOseb || 0),
+    opisNarocila: String(entry.opisNarocila || ''),
+    dogovorjenaCena: String(entry.dogovorjenaCena || ''),
+    status: ['povpraševanje', 'potrjeno', 'izvedeno', 'odpovedano'].includes(entry.status) ? entry.status : 'povpraševanje',
+    racunIzstavljen: !!entry.racunIzstavljen,
+    racunPlacan: !!entry.racunPlacan,
+    opombe: String(entry.opombe || '')
+  };
+}
+
 function normalizeMenuData(raw) {
   const base = raw || {};
   const contact = base.contact || {};
@@ -103,7 +122,8 @@ function normalizeMenuData(raw) {
       desserts: (sections.desserts || []).map(normalizeItemStatus),
       drinks: (sections.drinks || []).map(normalizeItemStatus)
     },
-    drinkCategories: normalizeDrinkCategories(base)
+    drinkCategories: normalizeDrinkCategories(base),
+    cateringEntries: Array.isArray(base.cateringEntries) ? base.cateringEntries.map(normalizeCateringEntry) : []
   };
 }
 
@@ -127,7 +147,7 @@ function upsertDishLibrary(payload) { /* unchanged logic */
   return payload;
 }
 
-const defaultData = { updatedAt: new Date().toISOString(), dishLibrary: [], translations: UI, allergens: ALLERGENS, settings: { restaurantName: 'Casa de Rin', phone: '+386 40 000 000', address: 'Casa de Rin, Ljubljana', googleMapsUrl: '', instagramUrl: 'https://instagram.com/casaderin', openingHours: { sl: '', en: '', it: '', de: '' }, footerText: { sl: '', en: '', it: '', de: '' }, heroImageUrl: '' }, sections: { daily: [item('stew', 'stew', { sl: 'Zelenjavna enolončnica dneva.', en: 'Vegetable stew of the day.', it: 'Zuppa vegetale del giorno.', de: 'Gemüse-Eintopf des Tages.' }, '7.50', ['zelena'])], lunch: [item('lunch', 'lunch', { sl: 'Mala enolončnica + malica + solata + sladica.', en: 'Small stew + lunch + salad + dessert.', it: 'Zuppa piccola + pranzo + insalata + dolce.', de: 'Kleiner Eintopf + Tagesgericht + Salat + Dessert.' }, '12.90', ['gluten', 'soja'])], weekly: [], desserts: [], drinks: [] }, drinkCategories: [{ id: 'house_tea', title: UI.drink_cat_house_tea, items: [item('p1', 'beverage', { sl: 'Domača pijača.', en: 'Homemade beverage.', it: 'Bevanda fatta in casa.', de: 'Hausgemachtes Getränk.' }, '2.00')] }, { id: 'coffee_hot', title: UI.drink_cat_coffee_hot, items: [] }, { id: 'juices_soda', title: UI.drink_cat_juices_soda, items: [] }] };
+const defaultData = { updatedAt: new Date().toISOString(), dishLibrary: [], translations: UI, allergens: ALLERGENS, settings: { restaurantName: 'Casa de Rin', phone: '+386 40 000 000', address: 'Casa de Rin, Ljubljana', googleMapsUrl: '', instagramUrl: 'https://instagram.com/casaderin', openingHours: { sl: '', en: '', it: '', de: '' }, footerText: { sl: '', en: '', it: '', de: '' }, heroImageUrl: '' }, sections: { daily: [item('stew', 'stew', { sl: 'Zelenjavna enolončnica dneva.', en: 'Vegetable stew of the day.', it: 'Zuppa vegetale del giorno.', de: 'Gemüse-Eintopf des Tages.' }, '7.50', ['zelena'])], lunch: [item('lunch', 'lunch', { sl: 'Mala enolončnica + malica + solata + sladica.', en: 'Small stew + lunch + salad + dessert.', it: 'Zuppa piccola + pranzo + insalata + dolce.', de: 'Kleiner Eintopf + Tagesgericht + Salat + Dessert.' }, '12.90', ['gluten', 'soja'])], weekly: [], desserts: [], drinks: [] }, cateringEntries: [], drinkCategories: [{ id: 'house_tea', title: UI.drink_cat_house_tea, items: [item('p1', 'beverage', { sl: 'Domača pijača.', en: 'Homemade beverage.', it: 'Bevanda fatta in casa.', de: 'Hausgemachtes Getränk.' }, '2.00')] }, { id: 'coffee_hot', title: UI.drink_cat_coffee_hot, items: [] }, { id: 'juices_soda', title: UI.drink_cat_juices_soda, items: [] }] };
 
 export async function loadMenu() { const s = getStore('menu'); const d = await s.get(MENU_KEY, { type: 'json' }); if (!d) { await s.setJSON(MENU_KEY, defaultData); return defaultData; } const normalized = normalizeMenuData(d); if (JSON.stringify(normalized) !== JSON.stringify(d)) await s.setJSON(MENU_KEY, normalized); return normalized; }
 export async function saveMenu(data) { const s = getStore('menu'); const payload = upsertDishLibrary({ ...normalizeMenuData(data), updatedAt: new Date().toISOString() }); await s.setJSON(MENU_KEY, payload); return payload; }
