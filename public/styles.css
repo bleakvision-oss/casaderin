@@ -136,7 +136,7 @@ img{max-width:100%;height:auto}
   grid-template-columns:240px minmax(0,1fr);
   gap:24px;
   align-items:start;
-  max-width:1860px;
+  max-width:2160px;
   margin:0 auto;
   padding:18px 20px 120px;
 }
@@ -200,7 +200,7 @@ img{max-width:100%;height:auto}
 .mobile-nav-label{display:none}
 
 /* ── PANEL ── */
-.admin-main{min-width:0;max-width:1600px;width:100%}
+.admin-main{min-width:0;max-width:1880px;width:100%}
 .panel-shell{
   background:#faf6ec;
   border:1px solid #e0d5b8;
