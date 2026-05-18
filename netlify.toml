@@ -36,3 +36,8 @@
   from = "/api/analytics/summary"
   to = "/.netlify/functions/analytics-summary"
   status = 200
+
+[[redirects]]
+  from = "/api/admin/analytics/reset"
+  to = "/.netlify/functions/admin-analytics-reset"
+  status = 200
