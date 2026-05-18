@@ -133,6 +133,7 @@ export async function loadMenu() { const s = getStore('menu'); const d = await s
 export async function saveMenu(data) { const s = getStore('menu'); const payload = upsertDishLibrary({ ...normalizeMenuData(data), updatedAt: new Date().toISOString() }); await s.setJSON(MENU_KEY, payload); return payload; }
 export async function appendAnalyticsView(view) { const s = getStore('menu'); const existing = await s.get(ANALYTICS_KEY, { type: 'json' }) || []; const next = [...existing, view].slice(-5000); await s.setJSON(ANALYTICS_KEY, next); return next; }
 export async function loadAnalytics() { const s = getStore('menu'); return await s.get(ANALYTICS_KEY, { type: 'json' }) || []; }
+export async function resetAnalytics() { const s = getStore('menu'); await s.setJSON(ANALYTICS_KEY, []); return []; }
 export function makeToken() { const secret = process.env.SESSION_SECRET; const payload = `${Date.now() + TOKEN_TTL_MS}`; const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex'); return `${payload}.${sig}`; }
 export function verifyToken(token) { const secret = process.env.SESSION_SECRET; if (!token || !secret) return false; const [exp, sig] = token.split('.'); if (!exp || !sig || Date.now() > Number(exp)) return false; const expected = crypto.createHmac('sha256', secret).update(exp).digest('hex'); return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)); }
 export const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
