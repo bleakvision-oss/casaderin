@@ -83,16 +83,16 @@ return panelShell('dnevnik','Dnevnik','Interni dnevnik priprave in prodaje jedi.
   </section>
   <section class='dashboard-card dnevnik-section'>
     <h3>${formTitle}</h3>
-    <form id='dnevnikForm' class='dnevnik-form-grid'>
-      <label>Datum<input name='date' type='date' required></label>
-      <label>Jed<input name='dishName' required></label>
-      <label>Pripravljeno<input name='preparedQty' type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Prodano<input name='soldQty' type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Ostalo<input name='leftoverQty' type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Rezultat<select name='resultStatus'>${options}</select></label>
-      <label>Opombe<input name='notes'></label>
+    <form id="dnevnikForm" class='dnevnik-form-grid'>
+      <label>Datum<input name="date" type='date' required></label>
+      <label>Jed<input name="dishName" required></label>
+      <label>Pripravljeno<input name="preparedQty" type='number' inputmode='numeric' min='0' step='1'></label>
+      <label>Prodano<input name="soldQty" type='number' inputmode='numeric' min='0' step='1'></label>
+      <label>Ostalo<input name="leftoverQty" type='number' inputmode='numeric' min='0' step='1'></label>
+      <label>Rezultat<select name="resultStatus">${options}</select></label>
+      <label>Opombe<input name="notes"></label>
       <div class='inline'>
-        <button class='btn' id='saveDnevnikEntry' type='button'>Shrani vnos</button>
+        <button class='btn' id="saveDnevnikEntry" type="button">Shrani vnos</button>
         ${dnevnikEditingId?"<button class='btn' id='cancelDnevnikEdit' type='button'>Prekliči urejanje</button>":''}
       </div>
     </form>
