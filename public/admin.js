@@ -47,6 +47,7 @@ const langToDeepL = { en: 'EN', it: 'IT', de: 'DE' };
 const normalizePrice = (value) => { const raw = String(value ?? '').trim().replace(',', '.'); const n = Number(raw); if (!Number.isFinite(n)) return '0,00'; return n.toFixed(2).replace('.', ','); };
 const normalizePriceForStorage = (value) => normalizePrice(value).replace(',', '.');
 const normalizeItemPrice = (item) => { if (item) item.price = normalizePrice(item.price); };
+const formatDateSl = (value) => { const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}.${m[2]}.${m[1]}` : (value || '—'); };
 const normalizeAllPrices = () => { Object.values(data.sections || {}).flat().forEach(normalizeItemPrice); (data.drinkCategories || []).forEach((cat) => (cat.items || []).forEach(normalizeItemPrice)); };
 const saveStatusText = () => ({ dirty: 'Neshranjene spremembe', saving: 'Shranjujem…', saved: 'Shranjeno ✓', error: 'Napaka pri shranjevanju', idle: '' }[saveState] || '');
 function updateSaveStatus(){ const msg=document.getElementById('msg'); if(!msg) return; msg.textContent=saveStatusText(); msg.className=`save-status is-${saveState}`; }
@@ -138,8 +139,7 @@ return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
       <label>Opis naročila<input name="opisNarocila"></label>
       <label>Dogovorjena cena<input name="dogovorjenaCena"></label>
       <label>Status<select name="status">${options}</select></label>
-      <label>Račun izstavljen<input name="racunIzstavljen" type='checkbox'></label>
-      <label>Račun plačan<input name="racunPlacan" type='checkbox'></label>
+      <div class='row'><label>Račun izstavljen<input name="racunIzstavljen" type='checkbox'></label><label>Račun plačan<input name="racunPlacan" type='checkbox'></label></div>
       <label>Opombe<input name="opombe"></label>
       <div class='inline'>
         <button class='btn' id="saveCateringEntry" type="button">Shrani catering</button>
@@ -149,7 +149,7 @@ return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
   </section>
   <section class='dashboard-card dnevnik-section'>
     <h3>Vnosi</h3>
-    <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='catering-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main'><h3 class='item-title'>${entry.stranka||'—'}</h3><p class='item-description'>Datum: ${entry.datum||'—'} · Ura: ${entry.ura||'—'} · Lokacija: ${entry.lokacija||'—'} · Št. oseb: ${entry.stOseb??0}</p><p class='item-description'>Kontakt: ${entry.kontakt||'—'} · Cena: ${entry.dogovorjenaCena||'—'} · Status: ${entry.status||'—'}</p><p class='item-description'>Račun izstavljen: ${entry.racunIzstavljen?'da':'ne'} · Račun plačan: ${entry.racunPlacan?'da':'ne'}</p><p class='item-description'>Opis: ${entry.opisNarocila||'—'}${entry.opombe?` · Opombe: ${entry.opombe}`:''}</p></div><div class='item-actions dnevnik-actions'><button class='btn' data-edit-catering-id='${entry.id}' type='button'>Uredi</button><button class='btn del' data-delete-catering-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
+    <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='catering-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main'><h3 class='item-title'>${entry.stranka||'—'}</h3><p class='item-description'>Datum: ${formatDateSl(entry.datum)} · Ura: ${entry.ura||'—'} · Lokacija: ${entry.lokacija||'—'} · Št. oseb: ${entry.stOseb??0}</p><p class='item-description'>Kontakt: ${entry.kontakt||'—'} · Cena: ${entry.dogovorjenaCena||'—'} · Status: ${entry.status||'—'}</p><p class='item-description'>Račun izstavljen: ${entry.racunIzstavljen?'da':'ne'} · Račun plačan: ${entry.racunPlacan?'da':'ne'}</p><p class='item-description'>Opis: ${entry.opisNarocila||'—'}${entry.opombe?` · Opombe: ${entry.opombe}`:''}</p></div><div class='item-actions dnevnik-actions'><button class='btn' data-edit-catering-id='${entry.id}' type='button'>Uredi</button><button class='btn del' data-delete-catering-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
   </section>`,false,false);}
 
 function sectionView(key,titleKey,desc){const arr=data.sections[key]||[];return panelShell(key,t(data.translations[titleKey]),desc,`<div class='item-list'>${arr.map((x,i)=>itemCard(key,i,x)).join('')}</div>`,true,arr.length);} 
