@@ -6,6 +6,7 @@ body{font-family:var(--font-sans);background:radial-gradient(circle at top,#f8f4
 .gold-bar{height:2px;max-width:860px;margin:8px auto 0;background:linear-gradient(90deg,transparent,var(--color-gold),transparent);opacity:.78}
 .wrap,main,.body,.menu-root,header,.visitor-card,.menu-card,.info-card{max-width:100%}
 .wrap{width:100%;max-width:860px;margin:0 auto;padding:16px 20px}
+body.admin-page .wrap{max-width:1700px;padding-inline:20px}
 .brand{font-size:2rem;color:var(--color-header-text);font-weight:700;letter-spacing:.4px;font-family:var(--font-serif)}
 #today{font-size:.93rem;margin-top:2px;color:rgba(248,244,234,.9)}
 .lang{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -133,18 +134,20 @@ img{max-width:100%;height:auto}
 /* ── ADMIN SHELL ── */
 .admin-shell{
   display:grid;
-  grid-template-columns:240px minmax(0,1fr);
-  gap:24px;
+  grid-template-columns:272px minmax(0,1fr);
+  gap:30px;
   align-items:start;
-  max-width:2160px;
-  margin:0 auto;
-  padding:18px 20px 120px;
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding:18px 0 120px;
 }
 
 /* ── SIDEBAR ── */
 .sidebar{
   position:sticky;
   top:12px;
+  width:272px;
   background:#3d5240;
   border:none;
   border-radius:16px;
@@ -200,7 +203,7 @@ img{max-width:100%;height:auto}
 .mobile-nav-label{display:none}
 
 /* ── PANEL ── */
-.admin-main{min-width:0;max-width:1880px;width:100%}
+.admin-main{min-width:0;max-width:none;width:100%}
 .panel-shell{
   background:#faf6ec;
   border:1px solid #e0d5b8;
@@ -503,7 +506,7 @@ img{max-width:100%;height:auto}
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   .admin-shell{grid-template-columns:1fr;gap:14px;padding:14px 16px 100px}
-  .sidebar{position:static;border-radius:12px;padding:16px 12px}
+  .sidebar{position:static;width:100%;border-radius:12px;padding:16px 12px}
   .sidebar nav{display:none}
   .mobile-nav-label{display:block;color:#c8c0a8;font-size:.8rem;font-weight:600}
   .mobile-nav-label select{margin-top:4px;background:#2f3a2e;color:#e4d9c2;border:1px solid #4a6349;border-radius:8px;padding:6px 8px}
