@@ -435,6 +435,13 @@ img{max-width:100%;height:auto}
 .dnevnik-form-grid .inline{grid-column:1/-1}
 .dnevnik-entry .admin-item-card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'main meta';align-items:start}
 .dnevnik-entry .item-actions{grid-area:meta;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+
+.catering-add-wrap{justify-content:flex-start;margin-bottom:2px}
+.catering-add-wrap .btn{font-weight:700}
+.catering-card-main{display:grid;gap:10px}
+.catering-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.catering-card-grid .item-description{margin:0;line-height:1.45}
+.catering-card-note{grid-column:1/-1}
 .icon-btn{
   width:30px;height:30px;min-height:30px;
   display:inline-flex;align-items:center;justify-content:center;
@@ -550,6 +557,7 @@ img{max-width:100%;height:auto}
   .dnevnik-form-grid{grid-template-columns:1fr}
   .dnevnik-entry .admin-item-card{grid-template-columns:1fr;grid-template-areas:'main' 'meta'}
   .dnevnik-entry .item-actions{flex-direction:row;justify-content:flex-start;align-items:center;flex-wrap:wrap}
+  .catering-card-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .allergens{flex-direction:row;align-items:flex-start}
