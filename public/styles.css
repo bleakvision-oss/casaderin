@@ -234,7 +234,6 @@ img{max-width:100%;height:auto}
   fill:none;
 }
 .nav-label{flex:1;min-width:0}
-.mobile-nav-label{display:none}
 
 /* ── PANEL ── */
 .admin-main{min-width:0;max-width:none;width:100%}
@@ -567,9 +566,11 @@ img{max-width:100%;height:auto}
 @media(max-width:960px){
   .admin-shell{grid-template-columns:1fr;gap:14px;padding:14px 16px 100px}
   .sidebar{position:static;width:100%;border-radius:7px;padding:15px 12px}
-  .sidebar nav{display:none}
-  .mobile-nav-label{display:block;color:#c8c0a8;font-size:.8rem;font-weight:600}
-  .mobile-nav-label select{margin-top:4px;background:#2f3a2e;color:#e4d9c2;border:1px solid #4a6349;border-radius:6px;padding:6px 8px}
+  .sidebar nav{gap:6px;max-height:50vh;overflow:auto;padding-right:2px}
+  .nav-link{padding:11px 12px;min-height:44px;border-radius:3px;font-size:.9rem}
+  .nav-link.active{padding-left:10px;border-left-width:3px}
+  .nav-icon{width:20px;min-width:20px;height:20px}
+  .nav-icon-svg{width:16px;height:16px}
   .panel-shell{padding:16px 14px}
   .panel-head{flex-direction:column;gap:10px}
   .admin-item-card{
