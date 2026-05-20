@@ -111,7 +111,7 @@ const options=dnevnikResultOptions.map((opt)=>`<option value='${opt}'>${opt}</op
 const formTitle=dnevnikEditingId?'Uredi vnos':'Nov vnos';
 return panelShell('dnevnik','Dnevnik','Interni dnevnik priprave in prodaje jedi.',`
   <section class='dashboard-card dnevnik-section'>
-    <h3>Iskanje po datumu</h3>
+    <h3 class='section-title'><span>Iskanje po datumu</span></h3>
     <form id='dnevnikFilterForm' class='dnevnik-form-grid'>
       <label>Datum<input name='filterDate' type='date' value='${dnevnikDateFilter}'></label>
       <div class='inline'>
@@ -121,7 +121,7 @@ return panelShell('dnevnik','Dnevnik','Interni dnevnik priprave in prodaje jedi.
     </form>
   </section>
   <section class='dashboard-card dnevnik-section'>
-    <h3>${formTitle}</h3>
+    <h3 class='section-title'><span>${formTitle}</span></h3>
     <form id="dnevnikForm" class='dnevnik-form-grid'>
       <label>Datum<input name="date" type='date' required></label>
       <label>Jed<input name="dishName" required></label>
@@ -137,7 +137,7 @@ return panelShell('dnevnik','Dnevnik','Interni dnevnik priprave in prodaje jedi.
     </form>
   </section>
   <section class='dashboard-card dnevnik-section'>
-    <h3>Vnosi</h3>
+    <h3 class='section-title'><span>Vnosi</span></h3>
     <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='dnevnik-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main'><h3 class='item-title'>${entry.dishName||'—'}</h3><p class='item-description'>Datum: ${entry.date||'—'} · Pripravljeno: ${entry.preparedQty??0} · Prodano: ${entry.soldQty??0} · Ostalo: ${entry.leftoverQty??0}</p><p class='item-description'>Status: ${entry.resultStatus||'—'}${entry.notes?` · Opombe: ${entry.notes}`:''}</p></div><div class='item-actions dnevnik-actions'><button class='btn edit-dnevnik' data-edit-dnevnik-id='${entry.id}' type='button'>Uredi</button><button class='btn del-dnevnik' data-delete-dnevnik-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
   </section>`,false,false);} 
 
@@ -152,7 +152,7 @@ const options=cateringStatusOptions.map((opt)=>`<option value='${opt}'>${opt}</o
 const formTitle=cateringEditingId?'Uredi catering':'Nov catering';
 return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
   <section class='dashboard-card dnevnik-section'>
-    <h3>Iskanje po datumu</h3>
+    <h3 class='section-title'><span>Iskanje po datumu</span></h3>
     <form id='cateringFilterForm' class='dnevnik-form-grid'>
       <label>Datum<input name='filterDate' type='date' value='${cateringDateFilter}'></label>
       <div class='inline'>
@@ -165,7 +165,7 @@ return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
     <div class='inline catering-add-wrap'>
       <button class='btn add' id='newCateringEntry' type='button'>Dodaj nov catering</button>
     </div>
-    <h3>${formTitle}</h3>
+    <h3 class='section-title'><span>${formTitle}</span></h3>
     <form id="cateringForm" class='dnevnik-form-grid'>
       <label>Datum<input name="datum" type='date' required></label>
       <label>Ura<input name="ura" type='time' required></label>
@@ -185,7 +185,7 @@ return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
     </form>
   </section>
   <section class='dashboard-card dnevnik-section'>
-    <h3>Vnosi</h3>
+    <h3 class='section-title'><span>Vnosi</span></h3>
     <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='catering-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main catering-card-main'><h3 class='item-title'>${entry.stranka||'—'}</h3><div class='catering-card-grid'><p class='item-description'><strong>Datum:</strong> ${formatDateSl(entry.datum)}<br><strong>Ura:</strong> ${entry.ura||'—'}<br><strong>Lokacija:</strong> ${entry.lokacija||'—'}</p><p class='item-description'><strong>Stranka:</strong> ${entry.stranka||'—'}<br><strong>Kontakt:</strong> ${entry.kontakt||'—'}</p><p class='item-description'><strong>Št. oseb:</strong> ${entry.stOseb??0}<br><strong>Cena:</strong> ${entry.dogovorjenaCena||'—'}</p><p class='item-description'><strong>Status:</strong> ${entry.status||'—'}<br><strong>Račun izstavljen:</strong> ${entry.racunIzstavljen?'da':'ne'}<br><strong>Račun plačan:</strong> ${entry.racunPlacan?'da':'ne'}</p><p class='item-description catering-card-note'><strong>Opis naročila:</strong> ${entry.opisNarocila||'—'}</p><p class='item-description catering-card-note'><strong>Opombe:</strong> ${entry.opombe||'—'}</p></div></div><div class='item-actions dnevnik-actions'><button class='btn' data-edit-catering-id='${entry.id}' type='button'>Uredi</button><button class='btn del' data-delete-catering-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
   </section>`,false,false);}
 
@@ -211,7 +211,7 @@ function activeContent(){
   return sectionView('daily','section_daily','Urejanje dnevne ponudbe.');
 }
 
-function sidebar(){const nav=(panel,label)=>`<button class='nav-link ${activePanel===panel?'active':''}' data-panel='${panel}'>${label}</button>`;return `<aside class='sidebar'><div class='brand-mini'>Casa de Rin</div><div class='sidebar-sub'>Upravljanje menija</div><label class='mobile-nav-label'>Sekcija<select id='mobileNav'><option value='daily'>Dnevna ponudba</option><option value='lunch'>Kosilo</option><option value='weekly'>Tedenska ponudba</option><option value='desserts'>Sladice</option>${(data.drinkCategories||[]).map((cat,ci)=>`<option value='drinks-${ci}'>${t(cat.title)}</option>`).join('')}<option value='settings'>Nastavitve</option><option value='export'>Izvoz / Uvoz</option><option value='qr'>QR koda</option><option value='analytics'>Analytics</option><option value='dnevnik'>Dnevnik</option><option value='cateringi'>Cateringi</option></select></label><nav><h5>MENI</h5>${nav('daily','Dnevna ponudba')}${nav('lunch','Kosilo')}${nav('weekly','Tedenska ponudba')}${nav('desserts','Sladice')}<h5>PIJAČA</h5>${(data.drinkCategories||[]).map((cat,ci)=>nav(`drinks-${ci}`,t(cat.title))).join('')}<h5>SISTEM</h5>${nav('settings','Nastavitve')}${nav('export','Izvoz / Uvoz')}${nav('qr','QR koda')}${nav('analytics','Analytics')}<h5>ADMIN</h5>${nav('dnevnik','Dnevnik')}${nav('cateringi','Cateringi')}<button class='btn' id='logoutBtn'>Odjava</button></nav></aside>`;}
+function sidebar(){const navIcons={daily:'▦',lunch:'☰',weekly:'◫',desserts:'◈',settings:'⚙',export:'⇅',qr:'⌁',analytics:'◴',dnevnik:'✎',cateringi:'✦'};const nav=(panel,label)=>`<button class='nav-link ${activePanel===panel?'active':''}' data-panel='${panel}'><span class='nav-icon' aria-hidden='true'>${panel.startsWith('drinks-')?'◌':(navIcons[panel]||'•')}</span><span class='nav-label'>${label}</span></button>`;return `<aside class='sidebar'><div class='brand-mini'>Casa de Rin</div><div class='sidebar-sub'>Upravljanje menija</div><label class='mobile-nav-label'>Sekcija<select id='mobileNav'><option value='daily'>Dnevna ponudba</option><option value='lunch'>Kosilo</option><option value='weekly'>Tedenska ponudba</option><option value='desserts'>Sladice</option>${(data.drinkCategories||[]).map((cat,ci)=>`<option value='drinks-${ci}'>${t(cat.title)}</option>`).join('')}<option value='settings'>Nastavitve</option><option value='export'>Izvoz / Uvoz</option><option value='qr'>QR koda</option><option value='analytics'>Analytics</option><option value='dnevnik'>Dnevnik</option><option value='cateringi'>Cateringi</option></select></label><nav><h5>MENI</h5>${nav('daily','Dnevna ponudba')}${nav('lunch','Kosilo')}${nav('weekly','Tedenska ponudba')}${nav('desserts','Sladice')}<h5>PIJAČA</h5>${(data.drinkCategories||[]).map((cat,ci)=>nav(`drinks-${ci}`,t(cat.title))).join('')}<h5>SISTEM</h5>${nav('settings','Nastavitve')}${nav('export','Izvoz / Uvoz')}${nav('qr','QR koda')}${nav('analytics','Analytics')}<h5>ADMIN</h5>${nav('dnevnik','Dnevnik')}${nav('cateringi','Cateringi')}<button class='btn' id='logoutBtn'>Odjava</button></nav></aside>`;}
 
 async function suggestTranslationsForItem(target){const availability = await fetch('/.netlify/functions/translate-suggest').then((r)=>r.json().catch(()=>({}))); if (!availability.configured) { alert('DEEPL_API_KEY manjka. Prevajanje trenutno ni nastavljeno.'); return; } const hasContent = translationTargets.some((lang)=>(target.description?.[lang] || '').trim()); if (hasContent && !window.confirm('Nekatera ciljna polja (EN/IT/DE) že vsebujejo besedilo. Ali jih želiš prepisati?')) return; const slDescription = (target.description?.sl || '').trim(); if (!slDescription) { alert('Manjka slovenski opis za prevod.'); return; } const translate = async (text, targetLang) => { const r = await fetch('/.netlify/functions/translate-suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, targetLang }) }); const j = await r.json().catch(()=>({})); if (!r.ok) throw new Error(j.error || 'Napaka pri prevajanju.'); return j.text; }; try { snapshotData(); for (const lang of translationTargets) { target.description = target.description || {}; target.description[lang] = await translate(slDescription, langToDeepL[lang]); } markDirty(); render(); } catch (e) { alert(e.message || 'Napaka pri prevajanju.'); }}
 function resolveTarget(el){const s=el.dataset.s,i=+el.dataset.i,c=el.dataset.c;return c!==''?data.drinkCategories[+c].items[i]:data.sections[s][i];}
