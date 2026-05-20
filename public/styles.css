@@ -178,9 +178,8 @@ img{max-width:100%;height:auto}
   letter-spacing:.22em;
   text-transform:uppercase;
   padding-top:10px;
-  display:flex;
-  align-items:center;
   gap:8px;
+  justify-content:flex-start;
   font-weight:600;
 }
 .sidebar h5::before,.sidebar h5::after{content:"";height:1px;flex:1;min-width:14px;background:linear-gradient(90deg,rgba(194,162,96,.12) 0%,rgba(194,162,96,.5) 50%,rgba(194,162,96,.12) 100%)}
@@ -190,11 +189,12 @@ img{max-width:100%;height:auto}
 .sidebar h5 span::before{content:"";width:5px;height:5px;border:1px solid rgba(200,173,116,.8);transform:rotate(45deg);display:inline-block}
 .nav-link{
   border:0;
-  background:transparent;
-  text-align:left;
   display:flex;
   align-items:center;
+  background:transparent;
+  text-align:left;
   gap:8px;
+  justify-content:flex-start;
   padding:9px 10px;
   border-radius:2px;
   cursor:pointer;
@@ -219,12 +219,17 @@ img{max-width:100%;height:auto}
   display:inline-flex;
   justify-content:center;
   align-items:center;
+  flex:0 0 18px;
   color:#ccb07a;
   opacity:.96;
 }
+
 .nav-icon-svg{
-  width:15px;
-  height:15px;
+  width:18px;
+  height:18px;
+  min-width:18px;
+  min-height:18px;
+  flex:0 0 18px;
   display:block;
   stroke:currentColor;
   stroke-width:1.8;
