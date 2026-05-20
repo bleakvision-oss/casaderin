@@ -172,6 +172,8 @@ img{max-width:100%;height:auto}
 }
 .sidebar nav{display:grid;gap:5px}
 .sidebar h5{
+  display:flex;
+  align-items:center;
   margin:16px 0 8px;
   color:#9fb29a;
   font-size:.64rem;
@@ -182,9 +184,9 @@ img{max-width:100%;height:auto}
   justify-content:flex-start;
   font-weight:600;
 }
-.sidebar h5::before,.sidebar h5::after{content:"";height:1px;flex:1;min-width:14px;background:linear-gradient(90deg,rgba(194,162,96,.12) 0%,rgba(194,162,96,.5) 50%,rgba(194,162,96,.12) 100%)}
-.sidebar h5::before{max-width:22px}
-.sidebar h5::after{opacity:.9}
+.sidebar h5::before,.sidebar h5::after{content:"";height:1px;flex:1;min-width:14px;background:linear-gradient(90deg,rgba(205,174,111,.03) 0%,rgba(205,174,111,.4) 50%,rgba(205,174,111,.03) 100%)}
+.sidebar h5::before{max-width:30px;opacity:.8}
+.sidebar h5::after{opacity:.85}
 .sidebar h5 span{display:inline-flex;align-items:center;gap:6px}
 .sidebar h5 span::before{content:"";width:5px;height:5px;border:1px solid rgba(200,173,116,.8);transform:rotate(45deg);display:inline-block}
 .nav-link{
@@ -193,7 +195,7 @@ img{max-width:100%;height:auto}
   align-items:center;
   background:transparent;
   text-align:left;
-  gap:8px;
+  gap:12px;
   justify-content:flex-start;
   padding:9px 10px;
   border-radius:2px;
@@ -213,31 +215,22 @@ img{max-width:100%;height:auto}
   padding-left:8px;
 }
 .nav-icon{
-  width:18px;
-  min-width:18px;
-  height:18px;
+  width:22px;
+  min-width:22px;
   display:inline-flex;
   justify-content:center;
   align-items:center;
-  flex:0 0 18px;
-  color:#ccb07a;
-  opacity:.96;
+  color:#e2d3a5;
+  opacity:.95;
 }
 
 .nav-icon-svg{
   width:18px;
   height:18px;
-  min-width:18px;
-  min-height:18px;
-  flex:0 0 18px;
   display:block;
-  stroke:currentColor;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  vector-effect:non-scaling-stroke;
-  fill:none;
+  flex-shrink:0;
 }
+.nav-link.active .nav-icon{color:#f0dfaa;opacity:1}
 .nav-label{flex:1;min-width:0}
 
 /* ── PANEL ── */
@@ -574,8 +567,8 @@ img{max-width:100%;height:auto}
   .sidebar nav{gap:6px;max-height:50vh;overflow:auto;padding-right:2px}
   .nav-link{padding:11px 12px;min-height:44px;border-radius:3px;font-size:.9rem}
   .nav-link.active{padding-left:10px;border-left-width:3px}
-  .nav-icon{width:20px;min-width:20px;height:20px}
-  .nav-icon-svg{width:16px;height:16px}
+  .nav-icon{width:22px;min-width:22px}
+  .nav-icon-svg{width:18px;height:18px}
   .panel-shell{padding:16px 14px}
   .panel-head{flex-direction:column;gap:10px}
   .admin-item-card{
