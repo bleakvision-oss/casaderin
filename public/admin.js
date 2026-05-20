@@ -1,3 +1,4 @@
+document.body.classList.add('admin-page');
 const TOKEN_KEY='adminToken';
 const TOKEN_EXP_KEY='adminTokenExpiresAt';
 const SESSION_MS=8*60*60*1000;
