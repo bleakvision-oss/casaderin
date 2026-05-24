@@ -1,5 +1,5 @@
 import { ACTIVE_PANEL_KEY, PUBLIC_MENU_URL, SESSION_MS, TOKEN_EXP_KEY, TOKEN_KEY, adminStatusLabels, cateringStatusOptions, cloneItem, dnevnikResultOptions, emptyItem, formatDateSl, getFormField, langToDeepL, langs, normalizeItemPrice, normalizePrice, normalizePriceForStorage, sanitizeCateringEntries, sanitizeCateringEntry, saveStatusText, setFormChecked, setFormValue, statusKeys, syncFlags, t, translationTargets } from './admin-utils.js';
-import { panelShell, itemCard as renderItemCard, dnevnikView as renderDnevnikView, cateringView as renderCateringView } from './admin-render.js';
+import { panelShell, itemCard as renderItemCard, dnevnikView as renderDnevnikView, cateringView as renderCateringView, renderExportView, renderQrView } from './admin-render.js';
 import { bindDnevnik, bindCateringi } from './admin-events.js';
 
 document.body.classList.add('admin-page');
@@ -59,7 +59,7 @@ function sectionView(key,titleKey,desc){const arr=data.sections[key]||[];return 
 function drinksView(ci){const cat=(data.drinkCategories||[])[ci]; if(!cat) return ''; const items=cat.items||[]; return panelShell(`drinks-${ci}`, t(cat.title), 'Urejanje skupine pijač.', `<div class='item-list'>${items.map((x,i)=>itemCard('drinks',i,x,ci)).join('')}</div>`,false,items.length,ci);} 
 function settingsView(){const s=data.settings;return panelShell('settings','Nastavitve','Nastavitve restavracije in prikaza.',`<section class='dashboard-card' id='restaurant-settings'><div class='row'><label>Restaurant name<input data-settings='restaurantName' value='${s.restaurantName||''}'></label><label>Phone number<input data-settings='phone' value='${s.phone||''}'></label><label>Address<input data-settings='address' value='${s.address||''}'></label></div><label>Google Maps URL<input data-settings='googleMapsUrl' value='${s.googleMapsUrl||''}'></label><label>Instagram URL<input data-settings='instagramUrl' value='${s.instagramUrl||''}'></label>${langFields(s,'openingHours')}${langFields(s,'footerText')}<label>Optional hero image URL<input data-settings='heroImageUrl' value='${s.heroImageUrl||''}'></label></section>`,false,false);} 
 function analyticsView(){const a=data.analyticsSummary||{total:0,byLanguage:{},byDevice:{mobile:0,desktop:0},today:0,last7Days:0};return panelShell('analytics','Analytics','Pregled obiska menija.',`<section class='dashboard-card' id='analytics'>${analyticsNotice?`<p class='import-msg success' id='analyticsNotice' aria-live='polite'>${analyticsNotice}</p>`:''}<div class='analytics-grid'><div><strong>Skupaj ogledov:</strong> ${a.total||0}</div><div><strong>Ogledi danes:</strong> ${a.today||0}</div><div><strong>Zadnjih 7 dni:</strong> ${a.last7Days||0}</div><div><strong>Jeziki:</strong> SL ${a.byLanguage?.sl||0} · EN ${a.byLanguage?.en||0} · IT ${a.byLanguage?.it||0} · DE ${a.byLanguage?.de||0}</div></div><div class='inline'><button class="btn danger" id="resetAnalyticsBtn">Počisti analytics</button></div></section>`,false,false);} 
-function exportView(){return panelShell('export','Izvoz / Uvoz','Varnostna kopija podatkov menija.',`<section class='dashboard-card'><div class='inline'><button class='btn' id='exportBackup'>Izvozi backup</button><button class='btn' id='importBackupBtn'>Uvozi backup</button><input id='importBackupInput' type='file' accept='.json,application/json' hidden></div><p id='importMsg' class='import-msg' aria-live='polite'></p></section>`,false,false);} 
+function exportView(){return renderExportView({ panelShell });} 
 function activeContent(){
   if (activePanel==='daily') return sectionView('daily','section_daily','Urejanje dnevne ponudbe.');
   if (activePanel==='lunch') return sectionView('lunch','lunch','Urejanje kosila.');
@@ -70,7 +70,7 @@ function activeContent(){
   if (activePanel==='analytics') return analyticsView();
   if (activePanel==='dnevnik') return dnevnikView();
   if (activePanel==='cateringi') return cateringView();
-  if (activePanel==='qr') { const qrSrc=`https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(PUBLIC_MENU_URL)}`; return panelShell('qr','QR koda','Hiter dostop do javnega menija.',`<section class='dashboard-card qr-card'><h3>QR koda za javni meni</h3><p class='qr-url'>${PUBLIC_MENU_URL}</p><img class='qr-image' src='${qrSrc}' alt='QR koda za javni meni'><div class='inline'><a class='btn' href='${PUBLIC_MENU_URL}' target='_blank' rel='noopener noreferrer'>Odpri javni meni</a><a class='btn' href='${qrSrc}' download='casaderin-menu-qr.png' target='_blank' rel='noopener noreferrer'>Prenesi QR kodo</a></div></section>`,false,false);} 
+  if (activePanel==='qr') return renderQrView({ panelShell, publicMenuUrl: PUBLIC_MENU_URL });
   if (activePanel==='export') return exportView();
   return sectionView('daily','section_daily','Urejanje dnevne ponudbe.');
 }
