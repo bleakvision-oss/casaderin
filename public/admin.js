@@ -1,4 +1,5 @@
 import { ACTIVE_PANEL_KEY, PUBLIC_MENU_URL, SESSION_MS, TOKEN_EXP_KEY, TOKEN_KEY, adminStatusLabels, cateringStatusOptions, cloneItem, dnevnikResultOptions, emptyItem, formatDateSl, getFormField, langToDeepL, langs, normalizeItemPrice, normalizePrice, normalizePriceForStorage, sanitizeCateringEntries, sanitizeCateringEntry, saveStatusText, setFormChecked, setFormValue, statusKeys, syncFlags, t, translationTargets } from './admin-utils.js';
+import { panelShell, itemCard as renderItemCard, dnevnikView as renderDnevnikView, cateringView as renderCateringView } from './admin-render.js';
 
 document.body.classList.add('admin-page');
 let token = '';
@@ -45,105 +46,19 @@ function applySessionFromStorage(){const storedToken=localStorage.getItem(TOKEN_
 function showLogin(message=''){document.getElementById('login').classList.remove('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('loginErr').textContent=message;}
 function handleUnauthorized(){clearSession();showLogin('Seja je potekla. Prosimo, prijavite se ponovno.');}
 
-function statusPills(x){return `<div class="item-status-group">${statusKeys.map((st)=>`<button class='btn status-btn status-${st.replace('_','-')} ${x.status===st?'active':''}' data-status='${st}' type='button'>${adminStatusLabels[st]}</button>`).join('')}</div>`;}
-function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
-function itemCard(section, i, x, drinkCatIdx=null){const isDrink = drinkCatIdx !== null; const itemId = x.id || `${section}:${drinkCatIdx ?? ''}:${i}`; const isAdvancedOpen = openAdvancedIds.has(itemId); return `<article class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}' data-id='${itemId}'><div class='item-shell'><div class='admin-item-card status-${x.status || 'available'}'><div class='item-move'><button type='button' class='btn move-btn up' title='Premakni gor' aria-label='Premakni gor'>↑</button><button type='button' class='btn move-btn down' title='Premakni dol' aria-label='Premakni dol'>↓</button></div><div class='item-main'><h3 class='item-title'>${t(x.name) || '—'}</h3><p class='item-description'>${t(x.description) || 'Brez opisa'}</p><div class='item-allergens'>${allergenPills(x)}</div></div><div class='item-meta'><div class='item-price'><label class='compact-field sr-only-label'>Cena (€)<input data-f='price' inputmode='decimal' aria-label='Cena v evrih' value='${x.price||''}'></label></div><div class='item-status'>${isDrink?'':statusPills(x)}</div><div class='item-actions'><button class='btn icon-btn duplicate-item' title='Dupliciraj' aria-label='Dupliciraj'>⧉</button><button class='btn icon-btn del' title='Izbriši' aria-label='Izbriši'>🗑</button></div></div><div class='item-advanced'><details class='advanced' ${isAdvancedOpen ? 'open' : ''}><summary><span>Prevodi in napredne nastavitve</span><span class='chevron' aria-hidden='true'>⌄</span></summary><div class='advanced-grid'><label>Ime (SL)<input data-l='sl' data-f='name' value="${(x.name?.sl || '').replaceAll('"', '&quot;')}"></label><label>Opis (SL)<input data-l='sl' data-f='description' value="${(x.description?.sl || '').replaceAll('"', '&quot;')}"></label></div><div class='inline'><button type='button' class='btn suggest'>Predlagaj prevode</button></div><div class='advanced-grid'>${translationTargets.map((l)=>`<label>Ime ${l.toUpperCase()}<input data-l='${l}' data-f='name' value="${(x.name?.[l] || '').replaceAll('"', '&quot;')}"></label><label>Opis ${l.toUpperCase()}<input data-l='${l}' data-f='description' value="${(x.description?.[l] || '').replaceAll('"', '&quot;')}"></label>`).join('')}</div><div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div></details></div></div></div></article>`;}
+function itemCard(section, i, x, drinkCatIdx=null){return renderItemCard(section, i, x, { drinkCatIdx, openAdvancedIds, statusKeys, adminStatusLabels, allergenIds: allergenIds(), t, allergens: data.allergens || {}, translationTargets });}
 
 
-function dnevnikView(){
-const entries=(data.dailyEntries||[])
-  .slice()
-  .sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-const filteredEntries=dnevnikDateFilter?entries.filter((entry)=>entry.date===dnevnikDateFilter):entries;
-const options=dnevnikResultOptions.map((opt)=>`<option value='${opt}'>${opt}</option>`).join('');
-const formTitle=dnevnikEditingId?'Uredi vnos':'Nov vnos';
-return panelShell('dnevnik','Dnevnik','Interni dnevnik priprave in prodaje jedi.',`
-  <section class='dashboard-card dnevnik-section'>
-    <h3 class='section-title'><span>Iskanje po datumu</span></h3>
-    <form id='dnevnikFilterForm' class='dnevnik-form-grid'>
-      <label>Datum<input name='filterDate' type='date' value='${dnevnikDateFilter}'></label>
-      <div class='inline'>
-        <button class='btn' id='filterDnevnikEntries' type='submit'>Išči</button>
-        <button class='btn' id='clearDnevnikFilter' type='button'>Prikaži vse</button>
-      </div>
-    </form>
-  </section>
-  <section class='dashboard-card dnevnik-section'>
-    <h3 class='section-title'><span>${formTitle}</span></h3>
-    <form id="dnevnikForm" class='dnevnik-form-grid'>
-      <label>Datum<input name="date" type='date' required></label>
-      <label>Jed<input name="dishName" required></label>
-      <label>Pripravljeno<input name="preparedQty" type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Prodano<input name="soldQty" type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Ostalo<input name="leftoverQty" type='number' inputmode='numeric' min='0' step='1'></label>
-      <label>Rezultat<select name="resultStatus">${options}</select></label>
-      <label>Opombe<input name="notes"></label>
-      <div class='inline'>
-        <button class='btn' id="saveDnevnikEntry" type="button">Shrani vnos</button>
-        ${dnevnikEditingId?"<button class='btn' id='cancelDnevnikEdit' type='button'>Prekliči urejanje</button>":''}
-      </div>
-    </form>
-  </section>
-  <section class='dashboard-card dnevnik-section'>
-    <h3 class='section-title'><span>Vnosi</span></h3>
-    <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='dnevnik-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main'><h3 class='item-title'>${entry.dishName||'—'}</h3><p class='item-description'>Datum: ${entry.date||'—'} · Pripravljeno: ${entry.preparedQty??0} · Prodano: ${entry.soldQty??0} · Ostalo: ${entry.leftoverQty??0}</p><p class='item-description'>Status: ${entry.resultStatus||'—'}${entry.notes?` · Opombe: ${entry.notes}`:''}</p></div><div class='item-actions dnevnik-actions'><button class='btn edit-dnevnik' data-edit-dnevnik-id='${entry.id}' type='button'>Uredi</button><button class='btn del-dnevnik' data-delete-dnevnik-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
-  </section>`,false,false);} 
+function dnevnikView(){return renderDnevnikView({ data, dnevnikDateFilter, dnevnikEditingId, dnevnikResultOptions, panelShell });}
 
 
-
-function cateringView(){
-const entries=(data.cateringEntries||[])
-  .slice()
-  .sort((a,b)=>String(b.datum||'').localeCompare(String(a.datum||'')));
-const filteredEntries=cateringDateFilter?entries.filter((entry)=>entry.datum===cateringDateFilter):entries;
-const options=cateringStatusOptions.map((opt)=>`<option value='${opt}'>${opt}</option>`).join('');
-const formTitle=cateringEditingId?'Uredi catering':'Nov catering';
-return panelShell('cateringi','Cateringi','Interno upravljanje cateringov.',`
-  <section class='dashboard-card dnevnik-section'>
-    <h3 class='section-title'><span>Iskanje po datumu</span></h3>
-    <form id='cateringFilterForm' class='dnevnik-form-grid'>
-      <label>Datum<input name='filterDate' type='date' value='${cateringDateFilter}'></label>
-      <div class='inline'>
-        <button class='btn' id='filterCateringEntries' type='submit'>Išči</button>
-        <button class='btn' id='clearCateringFilter' type='button'>Prikaži vse</button>
-      </div>
-    </form>
-  </section>
-  <section class='dashboard-card dnevnik-section'>
-    <div class='inline catering-add-wrap'>
-      <button class='btn add' id='newCateringEntry' type='button'>Dodaj nov catering</button>
-    </div>
-    <h3 class='section-title'><span>${formTitle}</span></h3>
-    <form id="cateringForm" class='dnevnik-form-grid'>
-      <label>Datum<input name="datum" type='date' required></label>
-      <label>Ura<input name="ura" type='time' required></label>
-      <label>Stranka<input name="stranka" required></label>
-      <label>Kontakt<input name="kontakt" required></label>
-      <label>Lokacija<input name="lokacija" required></label>
-      <label>Št. oseb<input name="stOseb" type='number' inputmode='numeric' min='0' step='1' required></label>
-      <label>Opis naročila<input name="opisNarocila"></label>
-      <label>Dogovorjena cena<input name="dogovorjenaCena"></label>
-      <label>Status<select name="status">${options}</select></label>
-      <div class='row'><label>Račun izstavljen<input name="racunIzstavljen" type='checkbox'></label><label>Račun plačan<input name="racunPlacan" type='checkbox'></label></div>
-      <label>Opombe<input name="opombe"></label>
-      <div class='inline'>
-        <button class='btn' id="saveCateringEntry" type="button">Shrani catering</button>
-        ${cateringEditingId?"<button class='btn' id='cancelCateringEdit' type='button'>Prekliči urejanje</button>":''}
-      </div>
-    </form>
-  </section>
-  <section class='dashboard-card dnevnik-section'>
-    <h3 class='section-title'><span>Vnosi</span></h3>
-    <div class='item-list dnevnik-entry-list'>${filteredEntries.map((entry)=>`<article class='catering-entry-card dnevnik-entry'><div class='item-shell'><div class='admin-item-card status-available'><div class='item-main catering-card-main'><h3 class='item-title'>${entry.stranka||'—'}</h3><div class='catering-card-grid'><p class='item-description'><strong>Datum:</strong> ${formatDateSl(entry.datum)}<br><strong>Ura:</strong> ${entry.ura||'—'}<br><strong>Lokacija:</strong> ${entry.lokacija||'—'}</p><p class='item-description'><strong>Stranka:</strong> ${entry.stranka||'—'}<br><strong>Kontakt:</strong> ${entry.kontakt||'—'}</p><p class='item-description'><strong>Št. oseb:</strong> ${entry.stOseb??0}<br><strong>Cena:</strong> ${entry.dogovorjenaCena||'—'}</p><p class='item-description'><strong>Status:</strong> ${entry.status||'—'}<br><strong>Račun izstavljen:</strong> ${entry.racunIzstavljen?'da':'ne'}<br><strong>Račun plačan:</strong> ${entry.racunPlacan?'da':'ne'}</p><p class='item-description catering-card-note'><strong>Opis naročila:</strong> ${entry.opisNarocila||'—'}</p><p class='item-description catering-card-note'><strong>Opombe:</strong> ${entry.opombe||'—'}</p></div></div><div class='item-actions dnevnik-actions'><button class='btn' data-edit-catering-id='${entry.id}' type='button'>Uredi</button><button class='btn del' data-delete-catering-id='${entry.id}' type='button'>Izbriši</button></div></div></div></article>`).join('')}</div>
-  </section>`,false,false);}
+function cateringView(){return renderCateringView({ data, cateringDateFilter, cateringEditingId, cateringStatusOptions, formatDateSl, panelShell });}
 
 function sectionView(key,titleKey,desc){const arr=data.sections[key]||[];return panelShell(key,t(data.translations[titleKey]),desc,`<div class='item-list'>${arr.map((x,i)=>itemCard(key,i,x)).join('')}</div>`,true,arr.length);} 
 function drinksView(ci){const cat=(data.drinkCategories||[])[ci]; if(!cat) return ''; const items=cat.items||[]; return panelShell(`drinks-${ci}`, t(cat.title), 'Urejanje skupine pijač.', `<div class='item-list'>${items.map((x,i)=>itemCard('drinks',i,x,ci)).join('')}</div>`,false,items.length,ci);} 
 function settingsView(){const s=data.settings;return panelShell('settings','Nastavitve','Nastavitve restavracije in prikaza.',`<section class='dashboard-card' id='restaurant-settings'><div class='row'><label>Restaurant name<input data-settings='restaurantName' value='${s.restaurantName||''}'></label><label>Phone number<input data-settings='phone' value='${s.phone||''}'></label><label>Address<input data-settings='address' value='${s.address||''}'></label></div><label>Google Maps URL<input data-settings='googleMapsUrl' value='${s.googleMapsUrl||''}'></label><label>Instagram URL<input data-settings='instagramUrl' value='${s.instagramUrl||''}'></label>${langFields(s,'openingHours')}${langFields(s,'footerText')}<label>Optional hero image URL<input data-settings='heroImageUrl' value='${s.heroImageUrl||''}'></label></section>`,false,false);} 
 function analyticsView(){const a=data.analyticsSummary||{total:0,byLanguage:{},byDevice:{mobile:0,desktop:0},today:0,last7Days:0};return panelShell('analytics','Analytics','Pregled obiska menija.',`<section class='dashboard-card' id='analytics'>${analyticsNotice?`<p class='import-msg success' id='analyticsNotice' aria-live='polite'>${analyticsNotice}</p>`:''}<div class='analytics-grid'><div><strong>Skupaj ogledov:</strong> ${a.total||0}</div><div><strong>Ogledi danes:</strong> ${a.today||0}</div><div><strong>Zadnjih 7 dni:</strong> ${a.last7Days||0}</div><div><strong>Jeziki:</strong> SL ${a.byLanguage?.sl||0} · EN ${a.byLanguage?.en||0} · IT ${a.byLanguage?.it||0} · DE ${a.byLanguage?.de||0}</div></div><div class='inline'><button class="btn danger" id="resetAnalyticsBtn">Počisti analytics</button></div></section>`,false,false);} 
 function exportView(){return panelShell('export','Izvoz / Uvoz','Varnostna kopija podatkov menija.',`<section class='dashboard-card'><div class='inline'><button class='btn' id='exportBackup'>Izvozi backup</button><button class='btn' id='importBackupBtn'>Uvozi backup</button><input id='importBackupInput' type='file' accept='.json,application/json' hidden></div><p id='importMsg' class='import-msg' aria-live='polite'></p></section>`,false,false);} 
-function panelShell(key,title,desc,body,allowStatus,canDup,drinkIdx=null){return `<div class='panel-shell'><div class='panel-head'><div><h2>${title}</h2><p>${desc}</p></div><div class='inline'><a class='btn' href='/menu.html' target='_blank'>Predogled menija</a>${key!=='analytics'&&key!=='settings'&&key!=='export'&&key!=='qr'&&key!=='dnevnik'&&key!=='cateringi'?`<button class='btn add' data-add-section='${key}'>Dodaj</button>`:''}${canDup!==false?`<button class='btn duplicate-last' data-dup-section='${key}' ${canDup?'':'disabled'}>Dupliciraj zadnjo</button>`:''}</div></div>${body}</div>`;}
-
 function activeContent(){
   if (activePanel==='daily') return sectionView('daily','section_daily','Urejanje dnevne ponudbe.');
   if (activePanel==='lunch') return sectionView('lunch','lunch','Urejanje kosila.');
