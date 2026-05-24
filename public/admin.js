@@ -1,5 +1,5 @@
 import { ACTIVE_PANEL_KEY, PUBLIC_MENU_URL, SESSION_MS, TOKEN_EXP_KEY, TOKEN_KEY, adminStatusLabels, cateringStatusOptions, cloneItem, dnevnikResultOptions, emptyItem, formatDateSl, getFormField, langToDeepL, langs, normalizeItemPrice, normalizePrice, normalizePriceForStorage, sanitizeCateringEntries, sanitizeCateringEntry, saveStatusText, setFormChecked, setFormValue, statusKeys, syncFlags, t, translationTargets } from './admin-utils.js';
-import { panelShell, itemCard as renderItemCard, dnevnikView as renderDnevnikView, cateringView as renderCateringView, exportPanelView as renderExportPanelView, qrPanelView as renderQrPanelView, analyticsView as renderAnalyticsView, settingsView as renderSettingsView } from './admin-render.js';
+import { panelShell, itemCard as renderItemCard, dnevnikView as renderDnevnikView, cateringView as renderCateringView, exportPanelView as renderExportPanelView, qrPanelView as renderQrPanelView, analyticsView as renderAnalyticsView, settingsView as renderSettingsView, sectionView as renderSectionView, drinksView as renderDrinksView } from './admin-render.js';
 import { bindDnevnik, bindCateringi } from './admin-events.js';
 
 document.body.classList.add('admin-page');
@@ -55,9 +55,9 @@ function dnevnikView(){return renderDnevnikView({ data, dnevnikDateFilter, dnevn
 
 function cateringView(){return renderCateringView({ data, cateringDateFilter, cateringEditingId, cateringStatusOptions, formatDateSl, panelShell });}
 
-function sectionView(key,titleKey,desc){const arr=data.sections[key]||[];return panelShell(key,t(data.translations[titleKey]),desc,`<div class='item-list'>${arr.map((x,i)=>itemCard(key,i,x)).join('')}</div>`,true,arr.length);} 
-function drinksView(ci){const cat=(data.drinkCategories||[])[ci]; if(!cat) return ''; const items=cat.items||[]; return panelShell(`drinks-${ci}`, t(cat.title), 'Urejanje skupine pijač.', `<div class='item-list'>${items.map((x,i)=>itemCard('drinks',i,x,ci)).join('')}</div>`,false,items.length,ci);} 
-function settingsView(){return renderSettingsView({ data, panelShell, langFields });} 
+function sectionView(key,titleKey,desc){return renderSectionView({ data, key, titleKey, desc, t, itemCard, panelShell });}
+function drinksView(ci){return renderDrinksView({ data, ci, t, itemCard, panelShell });}
+function settingsView(){return renderSettingsView({ data, panelShell, langFields });}
 function analyticsView(){return renderAnalyticsView({ data, analyticsNotice, panelShell });} 
 function exportView(){return renderExportPanelView({ panelShell });} 
 function activeContent(){
