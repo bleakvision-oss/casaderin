@@ -1,10 +1,6 @@
-document.body.classList.add('admin-page');
-const TOKEN_KEY='adminToken';
-const TOKEN_EXP_KEY='adminTokenExpiresAt';
-const SESSION_MS=8*60*60*1000;
-const ACTIVE_PANEL_KEY = 'adminActivePanel';
-const PUBLIC_MENU_URL = 'https://casaderin.netlify.app/menu';
+import { ACTIVE_PANEL_KEY, PUBLIC_MENU_URL, SESSION_MS, TOKEN_EXP_KEY, TOKEN_KEY, adminStatusLabels, cateringStatusOptions, cloneItem, dnevnikResultOptions, emptyItem, formatDateSl, getFormField, langToDeepL, langs, normalizeItemPrice, normalizePrice, normalizePriceForStorage, sanitizeCateringEntries, sanitizeCateringEntry, saveStatusText, setFormChecked, setFormValue, statusKeys, syncFlags, t, translationTargets } from './admin-utils.js';
 
+document.body.classList.add('admin-page');
 let token = '';
 let data = null; let dirty = false;
 let lastSnapshot = null;
@@ -16,11 +12,6 @@ let analyticsNotice = '';
 let cateringDateFilter = '';
 let cateringEditingId = '';
 const openAdvancedIds = new Set();
-const langs = ['sl', 'en', 'it', 'de'];
-const t = (o, k = 'sl') => o?.[k] || o?.sl || '';
-const statusKeys = ['available', 'low', 'sold_out', 'hidden'];
-const dnevnikResultOptions = ['super', 'okej', 'slabo', 'zmanjkalo'];
-const cateringStatusOptions = ['povpraševanje', 'potrjeno', 'izvedeno', 'odpovedano'];
 const allergenIds = () => Object.keys(data.allergens || {});
 const langFields = (obj, f) => langs.map((l) => `<label>${f} ${l.toUpperCase()}<input data-l='${l}' data-f='${f}' value="${(obj[f]?.[l] || '').replaceAll('"', '&quot;')}"></label>`).join('');
 const markDirty = () => { dirty = true; saveState = 'dirty'; updateSaveStatus(); };
@@ -40,51 +31,9 @@ const undoLastChange = () => {
   render();
   showUndoMessage();
 };
-const emptyItem = (type='') => ({ id: crypto.randomUUID(), type, name: { sl: '', en: '', it: '', de: '' }, description: { sl: '', en: '', it: '', de: '' }, price: '0.00', allergens: [], status: 'available', hidden: false, soldOut: false, lowStock: false, sortOrder: 0 });
-const cloneItem = (item) => { const clone = structuredClone(item || {}); clone.id = crypto.randomUUID(); clone.name = { sl: clone.name?.sl || '', en: clone.name?.en || '', it: clone.name?.it || '', de: clone.name?.de || '' }; clone.description = { sl: clone.description?.sl || '', en: clone.description?.en || '', it: clone.description?.it || '', de: clone.description?.de || '' }; clone.allergens = Array.isArray(clone.allergens) ? [...clone.allergens] : []; clone.type = clone.type || ''; clone.price = clone.price ?? '0.00'; clone.status = clone.status || 'available'; clone.sortOrder = Number(clone.sortOrder || 0); syncFlags(clone); return clone; };
-const syncFlags = (x)=>{x.hidden=x.status==='hidden';x.soldOut=x.status==='sold_out';x.lowStock=x.status==='low';};
-const translationTargets = ['en', 'it', 'de'];
-const langToDeepL = { en: 'EN', it: 'IT', de: 'DE' };
-const normalizePrice = (value) => { const raw = String(value ?? '').trim().replace(',', '.'); const n = Number(raw); if (!Number.isFinite(n)) return '0,00'; return n.toFixed(2).replace('.', ','); };
-const normalizePriceForStorage = (value) => normalizePrice(value).replace(',', '.');
-const normalizeItemPrice = (item) => { if (item) item.price = normalizePrice(item.price); };
-const formatDateSl = (value) => { const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}.${m[2]}.${m[1]}` : (value || '—'); };
 const normalizeAllPrices = () => { Object.values(data.sections || {}).flat().forEach(normalizeItemPrice); (data.drinkCategories || []).forEach((cat) => (cat.items || []).forEach(normalizeItemPrice)); };
-const saveStatusText = () => ({ dirty: 'Neshranjene spremembe', saving: 'Shranjujem…', saved: 'Shranjeno ✓', error: 'Napaka pri shranjevanju', idle: '' }[saveState] || '');
 
-const sanitizeCateringEntry = (entry = {}, fallbackId = '') => ({
-  id: String(entry?.id || fallbackId || crypto.randomUUID()),
-  datum: String(entry?.datum || ''),
-  ura: String(entry?.ura || ''),
-  stranka: String(entry?.stranka || ''),
-  kontakt: String(entry?.kontakt || ''),
-  lokacija: String(entry?.lokacija || ''),
-  stOseb: Number(entry?.stOseb || 0),
-  opisNarocila: String(entry?.opisNarocila || ''),
-  dogovorjenaCena: String(entry?.dogovorjenaCena || ''),
-  status: cateringStatusOptions.includes(entry?.status) ? entry.status : 'povpraševanje',
-  racunIzstavljen: Boolean(entry?.racunIzstavljen),
-  racunPlacan: Boolean(entry?.racunPlacan),
-  opombe: String(entry?.opombe || '')
-});
-const sanitizeCateringEntries = (entries = []) => (Array.isArray(entries) ? entries : []).map((entry) => sanitizeCateringEntry(entry));
-const getFormField = (form, fieldName) => {
-  if (!form || typeof form !== 'object') return null;
-  const direct = form[fieldName];
-  if (direct && typeof direct === 'object') return direct;
-  const viaElements = form.elements?.namedItem?.(fieldName);
-  if (viaElements && typeof viaElements === 'object') return viaElements;
-  return null;
-};
-const setFormValue = (form, fieldName, value = '') => {
-  const field = getFormField(form, fieldName);
-  if (field && 'value' in field) field.value = value ?? '';
-};
-const setFormChecked = (form, fieldName, checked = false) => {
-  const field = getFormField(form, fieldName);
-  if (field && 'checked' in field) field.checked = Boolean(checked);
-};
-function updateSaveStatus(){ const msg=document.getElementById('msg'); if(!msg) return; msg.textContent=saveStatusText(); msg.className=`save-status is-${saveState}`; }
+function updateSaveStatus(){ const msg=document.getElementById('msg'); if(!msg) return; msg.textContent=saveStatusText(saveState); msg.className=`save-status is-${saveState}`; }
 
 function clearSession(){token='';localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_EXP_KEY);} 
 function allowedPanels(){const staticPanels=['daily','lunch','weekly','desserts','settings','export','qr','analytics','dnevnik','cateringi'];const drinkPanels=(data?.drinkCategories||[]).map((_,i)=>`drinks-${i}`);return new Set([...staticPanels,...drinkPanels]);}
@@ -96,7 +45,6 @@ function applySessionFromStorage(){const storedToken=localStorage.getItem(TOKEN_
 function showLogin(message=''){document.getElementById('login').classList.remove('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('loginErr').textContent=message;}
 function handleUnauthorized(){clearSession();showLogin('Seja je potekla. Prosimo, prijavite se ponovno.');}
 
-const adminStatusLabels = { available: 'Na voljo', low: 'Malo še', sold_out: 'Razprodano', hidden: 'Skrito' };
 function statusPills(x){return `<div class="item-status-group">${statusKeys.map((st)=>`<button class='btn status-btn status-${st.replace('_','-')} ${x.status===st?'active':''}' data-status='${st}' type='button'>${adminStatusLabels[st]}</button>`).join('')}</div>`;}
 function allergenPills(x){return `<div class='pill-wrap'>${allergenIds().map((a)=>`<button class='pill ${x.allergens?.includes(a)?'active':''}' data-a='${a}' type='button'>${t(data.allergens[a])}</button>`).join('')}</div>`;}
 function itemCard(section, i, x, drinkCatIdx=null){const isDrink = drinkCatIdx !== null; const itemId = x.id || `${section}:${drinkCatIdx ?? ''}:${i}`; const isAdvancedOpen = openAdvancedIds.has(itemId); return `<article class='admin-item' data-s='${section}' data-i='${i}' data-c='${drinkCatIdx??''}' data-id='${itemId}'><div class='item-shell'><div class='admin-item-card status-${x.status || 'available'}'><div class='item-move'><button type='button' class='btn move-btn up' title='Premakni gor' aria-label='Premakni gor'>↑</button><button type='button' class='btn move-btn down' title='Premakni dol' aria-label='Premakni dol'>↓</button></div><div class='item-main'><h3 class='item-title'>${t(x.name) || '—'}</h3><p class='item-description'>${t(x.description) || 'Brez opisa'}</p><div class='item-allergens'>${allergenPills(x)}</div></div><div class='item-meta'><div class='item-price'><label class='compact-field sr-only-label'>Cena (€)<input data-f='price' inputmode='decimal' aria-label='Cena v evrih' value='${x.price||''}'></label></div><div class='item-status'>${isDrink?'':statusPills(x)}</div><div class='item-actions'><button class='btn icon-btn duplicate-item' title='Dupliciraj' aria-label='Dupliciraj'>⧉</button><button class='btn icon-btn del' title='Izbriši' aria-label='Izbriši'>🗑</button></div></div><div class='item-advanced'><details class='advanced' ${isAdvancedOpen ? 'open' : ''}><summary><span>Prevodi in napredne nastavitve</span><span class='chevron' aria-hidden='true'>⌄</span></summary><div class='advanced-grid'><label>Ime (SL)<input data-l='sl' data-f='name' value="${(x.name?.sl || '').replaceAll('"', '&quot;')}"></label><label>Opis (SL)<input data-l='sl' data-f='description' value="${(x.description?.sl || '').replaceAll('"', '&quot;')}"></label></div><div class='inline'><button type='button' class='btn suggest'>Predlagaj prevode</button></div><div class='advanced-grid'>${translationTargets.map((l)=>`<label>Ime ${l.toUpperCase()}<input data-l='${l}' data-f='name' value="${(x.name?.[l] || '').replaceAll('"', '&quot;')}"></label><label>Opis ${l.toUpperCase()}<input data-l='${l}' data-f='description' value="${(x.description?.[l] || '').replaceAll('"', '&quot;')}"></label>`).join('')}</div><div class='row'><label>Type<input data-f='type' value='${x.type||''}'></label><label>Sort<input data-f='sortOrder' value='${x.sortOrder||0}'></label></div></details></div></div></div></article>`;}
