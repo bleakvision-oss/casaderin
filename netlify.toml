@@ -5,7 +5,7 @@
 [[redirects]]
 from = "/"
 to = "/menu.html"
-status = 302
+status = 200
 
 [[redirects]]
   from = "/menu"
