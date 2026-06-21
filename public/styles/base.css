@@ -1,0 +1,23 @@
+:root{--color-bg:#f0ebe0;--color-header:#5f7156;--color-header-dark:#4f6048;--color-header-text:#f8f4ea;--color-card:#fffaf0;--color-border:#d8c99e;--color-gold:#b9a15f;--color-text:#1a1610;--color-muted:#6e6250;--color-olive:#6f7f5f;--color-sage:#8f9d7d;--color-deep-green:#2f3a2e;--color-warm-paper:#f4efe3;--color-paper:#f4efe3;--font-serif:Georgia,"Times New Roman",serif;--font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{font-family:var(--font-sans);background:radial-gradient(circle at top,#f8f4ea,var(--color-bg));color:var(--color-text);margin:0;line-height:1.55}
+.menu-header,.header{background:linear-gradient(180deg,#6a7c61 0%,#5f7156 100%);padding:28px 0 24px;position:sticky;top:0;border-bottom:1px solid rgba(214,199,155,.35);z-index:10;width:100%;max-width:100%;left:0;right:0;box-shadow:0 8px 18px rgba(47,58,46,.14)}
+.gold-bar{height:2px;max-width:860px;margin:8px auto 0;background:linear-gradient(90deg,transparent,var(--color-gold),transparent);opacity:.78}
+.wrap,main,.body,.menu-root,header,.visitor-card,.menu-card,.info-card{max-width:100%}
+.wrap{width:100%;max-width:860px;margin:0 auto;padding:16px 20px}
+body.admin-page .wrap{max-width:1700px;padding-inline:20px}
+.brand{font-size:2rem;color:var(--color-header-text);font-weight:700;letter-spacing:.4px;font-family:var(--font-serif)}
+.grid{display:grid;gap:14px}
+.card{background:transparent;border:0;padding:0;box-shadow:none}
+.card h3{margin:.4rem 0 .85rem;color:#463d2d;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-serif);font-size:1.45rem;font-weight:700;text-align:center}
+.card h3::before,.card h3::after{content:"";height:1px;flex:1;max-width:170px;background:#b9a15f;opacity:.8}
+.muted{color:var(--color-muted)}.hidden{display:none}
+img{max-width:100%;height:auto}
+@media(max-width:760px){
+  .menu-header,.header{position:static}
+  .body,main,.wrap{padding-left:14px;padding-right:14px}
+  .brand{font-size:1.6rem}
+  .grid{gap:10px}
+  .card h3::before,.card h3::after{max-width:70px}
+}
